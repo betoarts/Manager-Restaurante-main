@@ -141,11 +141,12 @@ O seed inicial cria automaticamente:
 
 ## Funcionalidades
 
-### Autenticação e Multi-Tenant
+### Autenticação e Controle de Acesso Dinâmico (RBAC)
 
 - JWT com claims `user_id`, `tenant_id` e `role`
 - Middleware `RequireAuth` protege rotas da API
-- Middleware `RequireRole` para RBAC (admin, caixa, garcom, cozinha, entregador)
+- Sistema de **Controle de Acesso Baseado em Roles (RBAC) Dinâmico**: Permissões granulares configuráveis
+- Redirecionamento dinâmico pós-login baseado no cargo do usuário (ex: Dashboard para admin, KDS para cozinha)
 - `TenantScope` no GORM isola dados entre empresas
 
 ### PDV (Ponto de Venda)
@@ -162,6 +163,14 @@ O seed inicial cria automaticamente:
 - **Fechamento de mesa direto do PDV**: botão "Fechar Mesa" na visão de consumo
 - **Transferência de mesa**: mover consumo entre mesas disponíveis
 - Integração com **TEF/Pinpad Cielo** para pagamentos com cartão
+
+### Gestão de Caixa e Segurança Financeira
+
+- **Controle Rigoroso do Caixa**: Abertura e fechamento de caixa auditados.
+- **Bloqueio de Operações (Security Guard)**: Criação de pedidos e abertura de mesas são estritamente bloqueadas no PDV e Mobile quando o caixa está fechado.
+- Modal persistente no app do Garçom alertando sobre caixa fechado.
+- Integração das operações financeiras do PDV com o módulo de Tesouraria/Financeiro.
+- Correção de estornos e devoluções em cancelamentos de pedidos.
 
 ### Mapa de Mesas
 
@@ -226,6 +235,12 @@ O seed inicial cria automaticamente:
 - Ticket médio
 - Top 5 produtos mais vendidos
 - Vendas por hora (gráfico)
+
+### Gestão de TI e Integrações
+
+- **Diretório de TI**: Cadastro e gerenciamento de infraestrutura/ativos com CRUD completo.
+- **Magic Fill**: Preenchimento automático do cadastro de ativos via upload de notas fiscais (XML).
+- **Integração WhatsApp**: Gerenciamento de sessão (QR Code), disparo de mensagens e sincronização de status em tempo real via WebSocket.
 
 ### Tempo Real (WebSocket)
 
