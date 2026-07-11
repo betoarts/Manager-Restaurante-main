@@ -1544,6 +1544,195 @@ func HandleCheckoutTable(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"success": true, "mesa": mesa})
 }
 
+// ========== Impressoras (ESC/POS Printers) Handlers ==========
+
+// HandleGetPrinters lists all printers for the current tenant
+func HandleGetPrinters(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+	db := database.GetDB()
+
+	var printers []domain.Impressora
+	if err := db.Scopes(middleware.TenantScope(tenantID)).Order("nome asc").Find(&printers).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(printers)
+}
+
+type CreatePrinterReq struct {
+	Nome        string `json:"nome"`
+	Tipo        string `json:"tipo"`        // "tcp" or "usb"
+	IP          string `json:"ip"`          // required when tipo=tcp
+	Porta       int    `json:"porta"`       // required when tipo=tcp, default 9100
+	Dispositivo string `json:"dispositivo"` // required when tipo=usb, e.g. /dev/usb/lp0
+	SetorID     uint   `json:"setor_id"`
+}
+
+// HandleCreatePrinter registers a new printer
+func HandleCreatePrinter(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+	req := new(CreatePrinterReq)
+	if err := c.BodyParser(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
+	if req.Nome == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Printer name is required"})
+	}
+	if req.SetorID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Sector (setor_id) is required"})
+	}
+	if req.Tipo == "" {
+		req.Tipo = "tcp"
+	}
+	if req.Tipo == "tcp" {
+		if req.IP == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "IP address is required for TCP printers"})
+		}
+		if req.Porta == 0 {
+			req.Porta = 9100
+		}
+	}
+	if req.Tipo == "usb" && req.Dispositivo == "" {
+		req.Dispositivo = "/dev/usb/lp0"
+	}
+
+	db := database.GetDB()
+	printer := domain.Impressora{
+		TenantID:    tenantID,
+		Nome:        req.Nome,
+		Tipo:        req.Tipo,
+		IP:          req.IP,
+		Porta:       req.Porta,
+		Dispositivo: req.Dispositivo,
+		SetorID:     req.SetorID,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	if err := db.Create(&printer).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to register printer: " + err.Error()})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(printer)
+}
+
+// HandleUpdatePrinter updates an existing printer configuration
+func HandleUpdatePrinter(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+	printerID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid printer ID"})
+	}
+
+	db := database.GetDB()
+	var printer domain.Impressora
+	if err := db.Scopes(middleware.TenantScope(tenantID)).First(&printer, printerID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Printer not found"})
+	}
+
+	type UpdatePrinterReq struct {
+		Nome        *string `json:"nome"`
+		Tipo        *string `json:"tipo"`
+		IP          *string `json:"ip"`
+		Porta       *int    `json:"porta"`
+		Dispositivo *string `json:"dispositivo"`
+		SetorID     *uint   `json:"setor_id"`
+	}
+
+	req := new(UpdatePrinterReq)
+	if err := c.BodyParser(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid body"})
+	}
+
+	if req.Nome != nil {
+		printer.Nome = *req.Nome
+	}
+	if req.Tipo != nil {
+		printer.Tipo = *req.Tipo
+	}
+	if req.IP != nil {
+		printer.IP = *req.IP
+	}
+	if req.Porta != nil {
+		printer.Porta = *req.Porta
+	}
+	if req.Dispositivo != nil {
+		printer.Dispositivo = *req.Dispositivo
+	}
+	if req.SetorID != nil {
+		printer.SetorID = *req.SetorID
+	}
+	printer.UpdatedAt = time.Now()
+
+	if err := db.Save(&printer).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update printer"})
+	}
+
+	return c.JSON(printer)
+}
+
+// HandleDeletePrinter removes a printer
+func HandleDeletePrinter(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+	printerID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid printer ID"})
+	}
+
+	db := database.GetDB()
+	var printer domain.Impressora
+	if err := db.Scopes(middleware.TenantScope(tenantID)).First(&printer, printerID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Printer not found"})
+	}
+
+	if err := db.Delete(&printer).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete printer"})
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
+// HandleTestPrinter sends a test page to the specified printer
+func HandleTestPrinter(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+	printerID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid printer ID"})
+	}
+
+	db := database.GetDB()
+	var printer domain.Impressora
+	if err := db.Scopes(middleware.TenantScope(tenantID)).First(&printer, printerID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Printer not found"})
+	}
+
+	// Build test page payload
+	var data []byte
+	data = append(data, []byte{0x1B, 0x40}...)       // ESC @ - Init
+	data = append(data, []byte{0x1B, 0x61, 0x01}...) // Center align
+	data = append(data, []byte{0x1B, 0x45, 0x01}...) // Bold on
+	data = append(data, []byte("=== TESTE DE IMPRESSORA ===\n")...)
+	data = append(data, []byte{0x1B, 0x45, 0x00}...) // Bold off
+	data = append(data, []byte(fmt.Sprintf("Impressora: %s\n", printer.Nome))...)
+	if printer.Tipo == "usb" {
+		data = append(data, []byte(fmt.Sprintf("Tipo: USB\nDispositivo: %s\n", printer.Dispositivo))...)
+	} else {
+		data = append(data, []byte(fmt.Sprintf("Tipo: TCP/Rede\nEndereco: %s:%d\n", printer.IP, printer.Porta))...)
+	}
+	data = append(data, []byte(fmt.Sprintf("Data/Hora: %s\n", time.Now().Format("02/01/2006 15:04:05")))...)
+	data = append(data, []byte("Se voce ve esta pagina, a impressora\nesta funcionando corretamente!\n")...)
+	data = append(data, []byte("----------------------------------\n\n\n")...)
+	data = append(data, []byte{0x1D, 0x56, 0x41, 0x03}...) // Cut
+
+	if err := services.TestPrinter(&printer, data); err != nil {
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+			"success": false,
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{"success": true, "message": "Página de teste enviada com sucesso!"})
+}
+
 // ========== Pinpad (TEF/Cielo) Handlers ==========
 
 // HandleGetPinpads lists all pinpads for the current tenant

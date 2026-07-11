@@ -106,6 +106,13 @@ func main() {
 	protected.Delete("/pinpads/:id", handlers.HandleDeletePinpad)
 	protected.Get("/pinpads/:id/detect", handlers.HandleDetectPinpad)
 
+	// Impressoras (ESC/POS Printers - TCP and USB)
+	protected.Get("/printers", handlers.HandleGetPrinters)
+	protected.Post("/printers", handlers.HandleCreatePrinter)
+	protected.Put("/printers/:id", handlers.HandleUpdatePrinter)
+	protected.Delete("/printers/:id", handlers.HandleDeletePrinter)
+	protected.Post("/printers/:id/test", handlers.HandleTestPrinter)
+
 	// Dashboard/Analytics
 	protected.Get("/dashboard/stats", handlers.HandleGetDashboardStats)
 

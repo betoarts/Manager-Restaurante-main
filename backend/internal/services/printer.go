@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 
 	"manager-restaurant/backend/internal/domain"
@@ -67,14 +68,14 @@ func PrintOrderReceipt(tenantID uint, order domain.Pedido) error {
 		// Generate ESC/POS byte array for this printer
 		payload := buildESCPOSPayload(order, items, matchedPrinter.Nome)
 
-		// Send to printer
-		err := sendTCPData(matchedPrinter.IP, matchedPrinter.Porta, payload)
+		// Send to printer (USB or TCP)
+		err := sendToPrinter(matchedPrinter, payload)
 		if err != nil {
-			log.Printf("[PRINTER ERROR] Failed to send print job to %s (%s:%d): %v. Printing content to console log for debug:", 
-				matchedPrinter.Nome, matchedPrinter.IP, matchedPrinter.Porta, err)
+			log.Printf("[PRINTER ERROR] Failed to send print job to %s: %v. Printing content to console log for debug:",
+				matchedPrinter.Nome, err)
 			mockPrintToConsole(order, items)
 		} else {
-			log.Printf("[PRINTER SUCCESS] Printed %d items on %s (%s:%d)", len(items), matchedPrinter.Nome, matchedPrinter.IP, matchedPrinter.Porta)
+			log.Printf("[PRINTER SUCCESS] Printed %d items on %s", len(items), matchedPrinter.Nome)
 		}
 	}
 
@@ -120,6 +121,39 @@ func buildESCPOSPayload(order domain.Pedido, items []domain.ItemPedido, printerN
 	data = append(data, EscCut...)
 
 	return data
+}
+
+// sendToPrinter dispatches print data to a printer based on its type (tcp or usb)
+func sendToPrinter(p *domain.Impressora, data []byte) error {
+	if p.Tipo == "usb" {
+		if p.Dispositivo == "" {
+			return fmt.Errorf("USB printer '%s' has no device path configured", p.Nome)
+		}
+		return sendUSBData(p.Dispositivo, data)
+	}
+	// Default: TCP/Network
+	return sendTCPData(p.IP, p.Porta, data)
+}
+
+// TestPrinter is the public exported wrapper for sending arbitrary ESC/POS data to a printer.
+// Used by handlers for test-page requests.
+func TestPrinter(p *domain.Impressora, data []byte) error {
+	return sendToPrinter(p, data)
+}
+
+// sendUSBData writes raw bytes directly to a USB printer device file
+func sendUSBData(devicePath string, data []byte) error {
+	f, err := os.OpenFile(devicePath, os.O_WRONLY, 0666)
+	if err != nil {
+		return fmt.Errorf("failed to open USB device %s: %w", devicePath, err)
+	}
+	defer f.Close()
+
+	_, err = f.Write(data)
+	if err != nil {
+		return fmt.Errorf("failed to write to USB device %s: %w", devicePath, err)
+	}
+	return nil
 }
 
 // sendTCPData writes raw bytes to a network socket
@@ -178,6 +212,10 @@ func PrintPreCloseReceipt(tenantID uint, mesaNumero int, orders []domain.Pedido)
 	// Find cashier printer, or default to first
 	var matchedPrinter *domain.Impressora
 	for _, p := range printers {
+		if p.Tipo == "usb" && p.Dispositivo != "" {
+			matchedPrinter = &p
+			break
+		}
 		if p.IP != "" && p.Porta != 0 {
 			matchedPrinter = &p
 			break
@@ -225,8 +263,8 @@ func PrintPreCloseReceipt(tenantID uint, mesaNumero int, orders []domain.Pedido)
 	data = append(data, []byte("\n\n\n")...)
 	data = append(data, EscCut...)
 
-	// Send to printer
-	err := sendTCPData(matchedPrinter.IP, matchedPrinter.Porta, data)
+	// Send to printer (USB or TCP)
+	err := sendToPrinter(matchedPrinter, data)
 	if err != nil {
 		log.Printf("[PRINTER ERROR] Failed to send pre-close receipt: %v", err)
 		mockPrintPreCloseToConsole(mesaNumero, allItems, total)

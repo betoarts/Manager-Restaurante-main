@@ -403,22 +403,103 @@ export const Configuracoes: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Fetch Printers List
-  const { data: printers = [] } = useQuery<Impressora[]>({
+  // Printer CRUD state
+  const [printerDialogOpen, setPrinterDialogOpen] = useState(false);
+  const [selectedPrinter, setSelectedPrinter] = useState<Impressora | null>(null);
+  const [printerNome, setPrinterNome] = useState('');
+  const [printerTipo, setPrinterTipo] = useState<'tcp' | 'usb'>('tcp');
+  const [printerIP, setPrinterIP] = useState('192.168.1.100');
+  const [printerPorta, setPrinterPorta] = useState(9100);
+  const [printerDispositivo, setPrinterDispositivo] = useState('/dev/usb/lp0');
+  const [printerSetorID, setPrinterSetorID] = useState<number>(0);
+  const [testingPrinterId, setTestingPrinterId] = useState<number | null>(null);
+  const [printerTestResult, setPrinterTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null);
+
+  // Fetch Printers List from real API
+  const { data: printers = [], refetch: refetchPrinters } = useQuery<Impressora[]>({
     queryKey: ['printers'],
-    // Mock or fetch from api. Need to ensure endpoint exists.
-    // In our backend cmd/api/main.go we don't have a specific GET /printers endpoint. But we can query it or list it.
-    // Actually, printers are stored in Postgres and seeded. Let's write a mock listing or query if endpoint works.
-    // Since there isn't a custom endpoint, let's load a mock array based on seeded data if endpoint fails.
-    queryFn: async () => {
-      // In a real system we would have an endpoint, but since it's a mock view, we can just return standard seeded printers
-      return [
-        { id: 1, tenant_id: 1, nome: 'Impressora Cozinha', ip: '192.168.1.100', porta: 9100, setor_id: 1, created_at: '', updated_at: '' },
-        { id: 2, tenant_id: 1, nome: 'Impressora Bar', ip: '192.168.1.101', porta: 9100, setor_id: 2, created_at: '', updated_at: '' },
-        { id: 3, tenant_id: 1, nome: 'Impressora Caixa', ip: '192.168.1.102', porta: 9100, setor_id: 3, created_at: '', updated_at: '' },
-      ];
-    }
+    queryFn: () => api.get<Impressora[]>('/api/printers'),
   });
+
+  // Create/Update Printer
+  const savePrinterMutation = useMutation({
+    mutationFn: (payload: any) =>
+      selectedPrinter
+        ? api.put(`/api/printers/${selectedPrinter.id}`, payload)
+        : api.post('/api/printers', payload),
+    onSuccess: () => {
+      refetchPrinters();
+      setPrinterDialogOpen(false);
+      clearPrinterForm();
+    },
+    onError: (err: any) => {
+      setErrorMsg(err.message || 'Erro ao salvar impressora.');
+    },
+  });
+
+  // Delete Printer
+  const deletePrinterMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/api/printers/${id}`),
+    onSuccess: () => refetchPrinters(),
+    onError: (err: any) => setErrorMsg(err.message || 'Erro ao excluir impressora.'),
+  });
+
+  const clearPrinterForm = () => {
+    setPrinterNome('');
+    setPrinterTipo('tcp');
+    setPrinterIP('192.168.1.100');
+    setPrinterPorta(9100);
+    setPrinterDispositivo('/dev/usb/lp0');
+    setPrinterSetorID(setores[0]?.id || 0);
+    setSelectedPrinter(null);
+  };
+
+  const handleOpenCreatePrinter = () => {
+    clearPrinterForm();
+    setPrinterDialogOpen(true);
+  };
+
+  const handleOpenEditPrinter = (p: Impressora) => {
+    setSelectedPrinter(p);
+    setPrinterNome(p.nome);
+    setPrinterTipo(p.tipo || 'tcp');
+    setPrinterIP(p.ip || '192.168.1.100');
+    setPrinterPorta(p.porta || 9100);
+    setPrinterDispositivo(p.dispositivo || '/dev/usb/lp0');
+    setPrinterSetorID(p.setor_id);
+    setPrinterDialogOpen(true);
+  };
+
+  const handleSavePrinter = () => {
+    if (!printerNome) return;
+    setErrorMsg(null);
+    const payload: any = {
+      nome: printerNome,
+      tipo: printerTipo,
+      setor_id: printerSetorID,
+    };
+    if (printerTipo === 'tcp') {
+      payload.ip = printerIP;
+      payload.porta = printerPorta;
+    } else {
+      payload.dispositivo = printerDispositivo;
+    }
+    savePrinterMutation.mutate(payload);
+  };
+
+  const handleTestPrinter = async (id: number) => {
+    setTestingPrinterId(id);
+    setPrinterTestResult(null);
+    try {
+      const result = await api.post<{ success: boolean; message?: string; error?: string }>(`/api/printers/${id}/test`, {});
+      setPrinterTestResult(result);
+    } catch (err: any) {
+      setPrinterTestResult({ success: false, error: err.message || 'Falha na conexão com a impressora' });
+    } finally {
+      setTestingPrinterId(null);
+    }
+  };
+
 
   const saveSettingsMutation = useMutation({
     mutationFn: (payload: any) => api.put<any>('/api/auth/tenant', payload),
@@ -671,53 +752,238 @@ export const Configuracoes: React.FC = () => {
         </Card>
       )}
 
-      {/* Tab 2: Printers setup */}
+      {/* Tab 2: Printers setup - Full CRUD with USB support */}
       {activeTab === 2 && (
         <Card>
           <CardContent sx={{ p: 4 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
-              Configuração de Impressoras ESC/POS (Rede Local)
-            </Typography>
-            <TableContainer component={Paper} elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3 }}>
-              <Table>
-                <TableHead sx={{ bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
-                  <TableRow>
-                    <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Nome da Impressora</Typography></TableCell>
-                    <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Endereço IP</Typography></TableCell>
-                    <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Porta TCP</Typography></TableCell>
-                    <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Setor Roteado</Typography></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {printers.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell component="th" scope="row">
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.nome}</Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography variant="body2">{row.ip}</Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography variant="body2">{row.porta}</Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={
-                            row.setor_id === 1 ? 'Cozinha' : row.setor_id === 2 ? 'Bar' : 'Caixa'
-                          }
-                          color={row.setor_id === 1 ? 'error' : row.setor_id === 2 ? 'secondary' : 'success'}
-                          size="small"
-                          sx={{ fontWeight: 600 }}
-                        />
-                      </TableCell>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  Configuração de Impressoras ESC/POS
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Suporte a impressoras via rede TCP/IP e via USB direto (/dev/usb/lp*)
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<Printer size={16} />}
+                onClick={handleOpenCreatePrinter}
+              >
+                Adicionar Impressora
+              </Button>
+            </Box>
+
+            {printerTestResult && (
+              <Alert
+                severity={printerTestResult.success ? 'success' : 'error'}
+                sx={{ mb: 3, borderRadius: 3 }}
+                onClose={() => setPrinterTestResult(null)}
+              >
+                {printerTestResult.success
+                  ? printerTestResult.message || 'Página de teste enviada com sucesso!'
+                  : `Falha na impressora: ${printerTestResult.error || 'Sem resposta'}`}
+              </Alert>
+            )}
+
+            {printers.length === 0 ? (
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 6,
+                  textAlign: 'center',
+                  borderRadius: 3,
+                  borderStyle: 'dashed',
+                }}
+              >
+                <Printer size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
+                <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  Nenhuma impressora configurada
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Adicione impressoras de cozinha, bar e caixa. Suporte TCP e USB.
+                </Typography>
+              </Paper>
+            ) : (
+              <TableContainer component={Paper} elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3 }}>
+                <Table>
+                  <TableHead sx={{ bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
+                    <TableRow>
+                      <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Nome da Impressora</Typography></TableCell>
+                      <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Tipo</Typography></TableCell>
+                      <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Conexão</Typography></TableCell>
+                      <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Setor Roteado</Typography></TableCell>
+                      <TableCell align="right"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Ações</Typography></TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {printers.map((row) => {
+                      const setorName = setores.find((s) => s.id === row.setor_id)?.nome || `Setor ${row.setor_id}`;
+                      return (
+                        <TableRow key={row.id} hover>
+                          <TableCell component="th" scope="row">
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.nome}</Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={row.tipo === 'usb' ? 'USB Direto' : 'TCP/Rede'}
+                              color={row.tipo === 'usb' ? 'info' : 'warning'}
+                              size="small"
+                              variant="outlined"
+                              sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                              {row.tipo === 'usb' ? row.dispositivo : `${row.ip}:${row.porta}`}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={setorName}
+                              color="default"
+                              size="small"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                              <IconButton
+                                size="small"
+                                title="Enviar página de teste"
+                                disabled={testingPrinterId === row.id}
+                                onClick={() => handleTestPrinter(row.id)}
+                                sx={{ color: 'success.main' }}
+                              >
+                                {testingPrinterId === row.id
+                                  ? <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                                  : <Printer size={16} />}
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                title="Editar"
+                                onClick={() => handleOpenEditPrinter(row)}
+                                sx={{ color: 'primary.main' }}
+                              >
+                                <Edit size={16} />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                title="Remover"
+                                onClick={() => {
+                                  if (window.confirm(`Remover impressora "${row.nome}"?`)) {
+                                    deletePrinterMutation.mutate(row.id);
+                                  }
+                                }}
+                                sx={{ color: 'error.main' }}
+                              >
+                                <Trash2 size={16} />
+                              </IconButton>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+
+            {/* Printer Create/Edit Dialog */}
+            <Dialog open={printerDialogOpen} onClose={() => setPrinterDialogOpen(false)} maxWidth="sm" fullWidth>
+              <DialogTitle sx={{ fontWeight: 700 }}>
+                {selectedPrinter ? 'Editar Impressora' : 'Adicionar Impressora'}
+              </DialogTitle>
+              <DialogContent>
+                <Stack spacing={2.5} sx={{ mt: 1 }}>
+                  <TextField
+                    label="Nome da Impressora"
+                    fullWidth
+                    value={printerNome}
+                    onChange={(e) => setPrinterNome(e.target.value)}
+                    placeholder="Ex: Cozinha, Bar, Caixa Principal"
+                  />
+
+                  <TextField
+                    select
+                    label="Tipo de Conexão"
+                    fullWidth
+                    value={printerTipo}
+                    onChange={(e) => setPrinterTipo(e.target.value as 'tcp' | 'usb')}
+                    helperText={printerTipo === 'usb' ? 'Impressora conectada via USB diretamente ao servidor' : 'Impressora acessível via rede TCP/IP'}
+                  >
+                    <MenuItem value="tcp">🌐 TCP/IP – Rede Local</MenuItem>
+                    <MenuItem value="usb">🖨️ USB – Dispositivo Direto</MenuItem>
+                  </TextField>
+
+                  {printerTipo === 'tcp' ? (
+                    <>
+                      <TextField
+                        label="Endereço IP"
+                        fullWidth
+                        value={printerIP}
+                        onChange={(e) => setPrinterIP(e.target.value)}
+                        placeholder="192.168.1.100"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">IP</InputAdornment>,
+                        }}
+                      />
+                      <TextField
+                        label="Porta TCP"
+                        type="number"
+                        fullWidth
+                        value={printerPorta}
+                        onChange={(e) => setPrinterPorta(Number(e.target.value))}
+                        helperText="Padrão ESC/POS: 9100"
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">:</InputAdornment>,
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <TextField
+                      label="Caminho do Dispositivo USB"
+                      fullWidth
+                      value={printerDispositivo}
+                      onChange={(e) => setPrinterDispositivo(e.target.value)}
+                      placeholder="/dev/usb/lp0"
+                      helperText="Linux: /dev/usb/lp0, /dev/usb/lp1... Verifique com: ls /dev/usb/"
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">dev</InputAdornment>,
+                      }}
+                    />
+                  )}
+
+                  <TextField
+                    select
+                    label="Setor de Destino"
+                    fullWidth
+                    value={printerSetorID}
+                    onChange={(e) => setPrinterSetorID(Number(e.target.value))}
+                    helperText="Pedidos deste setor serão roteados para esta impressora"
+                  >
+                    {setores.map((s) => (
+                      <MenuItem key={s.id} value={s.id}>{s.nome}</MenuItem>
+                    ))}
+                  </TextField>
+                </Stack>
+              </DialogContent>
+              <DialogActions sx={{ px: 3, pb: 2 }}>
+                <Button onClick={() => setPrinterDialogOpen(false)}>Cancelar</Button>
+                <Button
+                  variant="contained"
+                  startIcon={<Save size={16} />}
+                  onClick={handleSavePrinter}
+                  disabled={savePrinterMutation.isPending}
+                >
+                  {selectedPrinter ? 'Salvar Alterações' : 'Adicionar'}
+                </Button>
+              </DialogActions>
+            </Dialog>
           </CardContent>
         </Card>
       )}
+
 
       {/* Tab 3: Pinpad / TEF setup */}
       {activeTab === 3 && (

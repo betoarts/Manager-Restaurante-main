@@ -180,14 +180,16 @@ type Pagamento struct {
 
 // Impressora represents a physical ESC/POS printer
 type Impressora struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	TenantID  uint      `gorm:"not null;index" json:"tenant_id"`
-	Nome      string    `gorm:"size:100;not null" json:"nome"`
-	IP        string    `gorm:"size:45;not null" json:"ip"` // Supports IPv4/IPv6
-	Porta     int       `gorm:"default:9100" json:"porta"`
-	SetorID   uint      `gorm:"not null" json:"setor_id"` // e.g., Cozinha, Bar, Caixa
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	TenantID    uint      `gorm:"not null;index" json:"tenant_id"`
+	Nome        string    `gorm:"size:100;not null" json:"nome"`
+	Tipo        string    `gorm:"size:10;default:'tcp'" json:"tipo"` // "tcp" (network) or "usb" (direct device)
+	IP          string    `gorm:"size:45" json:"ip"`                 // Supports IPv4/IPv6 (used when tipo=tcp)
+	Porta       int       `gorm:"default:9100" json:"porta"`         // TCP port (used when tipo=tcp)
+	Dispositivo string    `gorm:"size:255" json:"dispositivo"`       // Device path for USB, e.g. /dev/usb/lp0
+	SetorID     uint      `gorm:"not null" json:"setor_id"`          // e.g., Cozinha, Bar, Caixa
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // Pinpad represents credit card terminals (Cielo, Rede, Gertec, etc.)

@@ -156,8 +156,10 @@ export interface Impressora {
   id: number;
   tenant_id: number;
   nome: string;
+  tipo: 'tcp' | 'usb';
   ip: string;
   porta: number;
+  dispositivo: string;
   setor_id: number;
   created_at: string;
   updated_at: string;
