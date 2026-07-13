@@ -70,11 +70,13 @@ type Mesa struct {
 
 // Setor represents the service sector (Cozinha, Bar, Caixa, etc.)
 type Setor struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	TenantID  uint      `gorm:"not null;index" json:"tenant_id"`
-	Nome      string    `gorm:"size:100;not null" json:"nome"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	TenantID     uint      `gorm:"not null;index" json:"tenant_id"`
+	Nome         string    `gorm:"size:100;not null" json:"nome"`
+	KdsAtivo     bool      `gorm:"default:false" json:"kds_ativo"`
+	SemImpressao bool      `gorm:"default:false" json:"sem_impressao"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // Categoria represents product categories

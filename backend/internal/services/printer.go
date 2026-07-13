@@ -115,6 +115,19 @@ func PrintOrderReceipt(tenantID uint, order domain.Pedido) error {
 		return fmt.Errorf("database client not initialized")
 	}
 
+	// Fetch all sectors for print configuration
+	var sectors []domain.Setor
+	if err := db.Where("tenant_id = ?", tenantID).Find(&sectors).Error; err != nil {
+		return fmt.Errorf("failed to fetch sectors: %v", err)
+	}
+
+	sectorNames := make(map[uint]string)
+	sectorsSemImpressao := make(map[uint]bool)
+	for _, s := range sectors {
+		sectorNames[s.ID] = s.Nome
+		sectorsSemImpressao[s.ID] = s.SemImpressao
+	}
+
 	// Fetch all printers for this tenant
 	var printers []domain.Impressora
 	if err := db.Where("tenant_id = ?", tenantID).Find(&printers).Error; err != nil {
@@ -138,6 +151,12 @@ func PrintOrderReceipt(tenantID uint, order domain.Pedido) error {
 	destToPrinter := make(map[string]*domain.Impressora)
 
 	for _, item := range order.Itens {
+		// If this sector has disabled printing, skip routing it to any printer (including fallback)
+		if sectorsSemImpressao[item.SetorID] {
+			log.Printf("[PRINTER] Skipping printing for item '%s' (Sector %d has printing disabled).", item.ProdutoNome, item.SetorID)
+			continue
+		}
+
 		p, exists := sectorToPrinter[item.SetorID]
 		if !exists && len(printers) > 0 {
 			// Fallback: use first available printer if sector has no dedicated printer
@@ -151,14 +170,6 @@ func PrintOrderReceipt(tenantID uint, order domain.Pedido) error {
 		} else {
 			itemsByDest[""] = append(itemsByDest[""], item)
 		}
-	}
-
-	// Fetch sector names for printing
-	var sectors []domain.Setor
-	db.Where("tenant_id = ?", tenantID).Find(&sectors)
-	sectorNames := make(map[uint]string)
-	for _, s := range sectors {
-		sectorNames[s.ID] = s.Nome
 	}
 
 	for destKey, items := range itemsByDest {

@@ -784,6 +784,49 @@ func HandleGetSetores(c *fiber.Ctx) error {
 	return c.JSON(setores)
 }
 
+// HandleUpdateSetor updates a sector's settings (KdsAtivo, SemImpressao, etc.)
+func HandleUpdateSetor(c *fiber.Ctx) error {
+	tenantID := middleware.GetTenantID(c)
+	setorID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid sector ID"})
+	}
+
+	db := database.GetDB()
+	var setor domain.Setor
+	if err := db.Scopes(middleware.TenantScope(tenantID)).First(&setor, setorID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Sector not found"})
+	}
+
+	type UpdateSetorReq struct {
+		Nome         *string `json:"nome"`
+		KdsAtivo     *bool   `json:"kds_ativo"`
+		SemImpressao *bool   `json:"sem_impressao"`
+	}
+
+	req := new(UpdateSetorReq)
+	if err := c.BodyParser(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid body"})
+	}
+
+	if req.Nome != nil {
+		setor.Nome = *req.Nome
+	}
+	if req.KdsAtivo != nil {
+		setor.KdsAtivo = *req.KdsAtivo
+	}
+	if req.SemImpressao != nil {
+		setor.SemImpressao = *req.SemImpressao
+	}
+
+	setor.UpdatedAt = time.Now()
+	if err := db.Save(&setor).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update sector"})
+	}
+
+	return c.JSON(setor)
+}
+
 // Payment Handlers
 type ProcessPaymentReq struct {
 	PedidoID  *uint   `json:"pedido_id"`

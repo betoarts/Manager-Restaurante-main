@@ -184,9 +184,21 @@ export const Configuracoes: React.FC = () => {
   });
 
   // Fetch setores (KDS)
-  const { data: setores = [] } = useQuery<any[]>({
+  const { data: setores = [], refetch: refetchSetores } = useQuery<any[]>({
     queryKey: ['setores'],
     queryFn: () => api.get<any[]>('/api/setores'),
+  });
+
+  // Update Sector Settings (KDS / Printing)
+  const updateSetorMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: any }) =>
+      api.put(`/api/setores/${id}`, payload),
+    onSuccess: () => {
+      refetchSetores();
+    },
+    onError: (err: any) => {
+      setErrorMsg(err.message || 'Erro ao atualizar setor.');
+    },
   });
 
   const filteredProducts = allProducts.filter((p) =>
@@ -892,6 +904,73 @@ export const Configuracoes: React.FC = () => {
                 </Table>
               </TableContainer>
             )}
+
+            <Box sx={{ mt: 5, mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Setores de Produção & Configuração KDS
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Ative o painel KDS ou controle se o cupom físico de preparo de pedido deve ser impresso para cada setor.
+                Setores com a impressão desativada não enviarão cupons físicos (silenciando a impressão no setor correspondente e no caixa).
+              </Typography>
+            </Box>
+
+            <TableContainer component={Paper} elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 3 }}>
+              <Table>
+                <TableHead sx={{ bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)' }}>
+                  <TableRow>
+                    <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Nome do Setor</Typography></TableCell>
+                    <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Painel KDS Operacional</Typography></TableCell>
+                    <TableCell align="center"><Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Impressão de Cupom de Preparo</Typography></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {setores.map((setor) => (
+                    <TableRow key={setor.id} hover>
+                      <TableCell component="th" scope="row">
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{setor.nome}</Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={setor.kds_ativo}
+                              onChange={(e) => {
+                                updateSetorMutation.mutate({
+                                  id: setor.id,
+                                  payload: { kds_ativo: e.target.checked }
+                                });
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label={setor.kds_ativo ? "Ativo" : "Inativo"}
+                          sx={{ m: 0 }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={!setor.sem_impressao}
+                              onChange={(e) => {
+                                updateSetorMutation.mutate({
+                                  id: setor.id,
+                                  payload: { sem_impressao: !e.target.checked }
+                                });
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label={!setor.sem_impressao ? "Habilitada" : "Desativada (Silencioso)"}
+                          sx={{ m: 0 }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
             {/* Printer Create/Edit Dialog */}
             <Dialog open={printerDialogOpen} onClose={() => setPrinterDialogOpen(false)} maxWidth="sm" fullWidth>

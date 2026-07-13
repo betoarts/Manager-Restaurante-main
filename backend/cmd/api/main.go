@@ -94,6 +94,7 @@ func main() {
 	protected.Post("/orders/:id/cancel", handlers.HandleCancelOrder)
 	protected.Get("/kds", handlers.HandleGetKDS)
 	protected.Get("/setores", handlers.HandleGetSetores)
+	protected.Put("/setores/:id", handlers.HandleUpdateSetor)
 
 	// Payments
 	protected.Post("/payments", handlers.HandleProcessPayment)

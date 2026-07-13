@@ -37,6 +37,8 @@ export interface Setor {
   id: number;
   tenant_id: number;
   nome: string;
+  kds_ativo: boolean;
+  sem_impressao: boolean;
   created_at: string;
   updated_at: string;
 }
