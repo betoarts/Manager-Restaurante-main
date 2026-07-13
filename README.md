@@ -193,6 +193,7 @@ O seed inicial cria automaticamente:
 ### KDS (Kitchen Display System) Setorizado
 
 - **3 setores independentes**: Cozinha, Bar, Sobremesa
+- **Controle por Setor**: Opção de habilitar/desabilitar o painel KDS e silenciar a impressão física (KDS 100% digital).
 - Cada aba mostra apenas os itens do seu setor
 - Badge com contagem de pedidos pendentes por setor
 - Pedidos com itens de múltiplos setores aparecem em cada aba relevante
@@ -222,9 +223,12 @@ O seed inicial cria automaticamente:
 ### Impressão ESC/POS
 
 - Roteamento de itens do pedido por setor (cozinha, bar, caixa)
+- **Bloqueio de Impressão por Setor**: Opção `sem_impressao` desativa totalmente a impressão de cupons para itens de setores específicos.
 - Comandos ESC/POS: bold, double height, alinhamento, corte de papel
-- Envio via TCP para impressoras térmicas na rede
+- Envio via TCP para impressoras térmicas na rede ou diretamente para USB
+- Fallback inteligente para a impressora do Caixa caso a impressora principal do setor falhe.
 - Fallback para console quando impressora não configurada
+- Impressão automática de fechamento e abertura do caixa
 - Impressão de pré-conta no fechamento de mesa
 
 ### Dashboard
@@ -320,6 +324,7 @@ O seed inicial cria automaticamente:
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/api/setores` | Listar setores (Cozinha, Bar, Sobremesa, etc.) |
+| PUT | `/api/setores/:id` | Atualiza configurações operacionais do setor (KDS e Impressão) |
 
 ### Pedidos e KDS
 

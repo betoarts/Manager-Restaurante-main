@@ -2136,3 +2136,496 @@ PAGO VIA pix: R$ 23.40
 [0m[33m[0.226ms] [34;1m[rows:1][0m SELECT * FROM "empresas" WHERE "empresas"."id" = 1 ORDER BY "empresas"."id" LIMIT 1
 2026/07/13 13:12:43 [USB WRITE] device: /dev/usb/lp3, len: 478, content: "\x1b@\x1ba\x01\x1bE\x01\x1bE\x01RESTAURANTE NBAPARK\n\x1bE\x00COMPROVANTE PEDIDO #116\n\x1bE\x00Data: 13/07/2026 13:12:43\nVENDA DIRETA\n------------------------------------------\n\x1ba\x001x Coca-Cola Lata 350ml   R$   6.50\n1x Soda Sprite            R$   7.00\n1x Suco de Laranja Natura R$   9.90\n1x Petit Gateau com Sorve R$  22.90\n------------------------------------------\n\x1ba\x02SUBTOTAL: R$ 46.30\n\x1bE\x01PAGO VIA PIX: R$ 46.30\n\x1bE\x00------------------------------------------\n\x1ba\x01Obrigado pela preferencia!\nVolte sempre!\n\n\n\n\x1dVA\x03"
 13:12:44 | 400 |      45.965µs | 127.0.0.1 | GET | /api/tables/null/orders | -
+
+2026/07/13 13:27:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:781
+[0m[33m[1.989ms] [34;1m[rows:4][0m SELECT * FROM "setors" WHERE tenant_id = 1 ORDER BY nome asc
+13:27:24 | 200 |    2.301527ms | 127.0.0.1 | GET | /api/setores | -
+
+2026/07/13 13:27:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[2.049ms] [34;1m[rows:7][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" IN (115,116)
+
+2026/07/13 13:27:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[7.736ms] [34;1m[rows:2][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:24 | 200 |    7.998465ms | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:27 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[1.220ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '1' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:26 | 200 |    1.361038ms | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:29 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.440ms] [34;1m[rows:4][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 116
+
+2026/07/13 13:27:29 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[1.731ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '4' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:28 | 200 |     1.81768ms | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.332ms] [34;1m[rows:4][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 116
+
+2026/07/13 13:27:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[1.123ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE "pedidos"."id" = 116 AND tenant_id = 1 ORDER BY "pedidos"."id" LIMIT 1
+
+2026/07/13 13:27:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:724
+[0m[33m[3.460ms] [34;1m[rows:4][0m UPDATE "item_pedidos" SET "status"='produzindo',"updated_at"='2026-07-13 13:27:30.573' WHERE pedido_id = 116
+
+2026/07/13 13:27:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[0.663ms] [34;1m[rows:4][0m INSERT INTO "item_pedidos" ("tenant_id","pedido_id","produto_id","produto_nome","quantidade","observacao","preco_unitario","status","impresso","setor_id","created_at","updated_at","id") VALUES (1,116,4,'Coca-Cola Lata 350ml',1,'',6.5,'produzindo',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:12:43.514',201),(1,116,7,'Soda Sprite',1,'',7,'produzindo',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:12:43.514',202),(1,116,5,'Suco de Laranja Natural 500ml',1,'',9.9,'produzindo',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:12:43.514',203),(1,116,6,'Petit Gâteau com Sorvete',1,'',22.9,'produzindo',false,4,'2026-07-13 13:12:43.514','2026-07-13 13:12:43.514',204) ON CONFLICT ("id") DO UPDATE SET "pedido_id"="excluded"."pedido_id" RETURNING "id"
+
+2026/07/13 13:27:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[2.288ms] [34;1m[rows:1][0m UPDATE "pedidos" SET "tenant_id"=1,"comanda_id"=NULL,"mesa_id"=NULL,"status"='produzindo',"origem"='balcao',"total"=46.3,"cliente_id"=NULL,"entregador_id"=NULL,"endereco_entrega"='',"cpf_cnpj_cliente"='',"chave_acesso_nfe"='35260712345678000199650010000001161122334455',"url_cupom_fiscal"='https://nfce.fazenda.sp.gov.br/consulta?chave=35260712345678000199650010000001161122334455',"created_at"='2026-07-13 13:12:43.513',"updated_at"='2026-07-13 13:27:30.576' WHERE "id" = 116
+13:27:30 | 200 |    7.759829ms | 127.0.0.1 | PUT | /api/orders/116 | -
+
+2026/07/13 13:27:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.310ms] [34;1m[rows:4][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 116
+
+2026/07/13 13:27:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[1.087ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE "pedidos"."id" = 116 AND tenant_id = 1 ORDER BY "pedidos"."id" LIMIT 1
+
+2026/07/13 13:27:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:724
+[0m[33m[3.174ms] [34;1m[rows:4][0m UPDATE "item_pedidos" SET "status"='pronto',"updated_at"='2026-07-13 13:27:31.697' WHERE pedido_id = 116
+
+2026/07/13 13:27:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[0.469ms] [34;1m[rows:4][0m INSERT INTO "item_pedidos" ("tenant_id","pedido_id","produto_id","produto_nome","quantidade","observacao","preco_unitario","status","impresso","setor_id","created_at","updated_at","id") VALUES (1,116,4,'Coca-Cola Lata 350ml',1,'',6.5,'pronto',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:27:30.573',201),(1,116,7,'Soda Sprite',1,'',7,'pronto',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:27:30.573',202),(1,116,5,'Suco de Laranja Natural 500ml',1,'',9.9,'pronto',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:27:30.573',203),(1,116,6,'Petit Gâteau com Sorvete',1,'',22.9,'pronto',false,4,'2026-07-13 13:12:43.514','2026-07-13 13:27:30.573',204) ON CONFLICT ("id") DO UPDATE SET "pedido_id"="excluded"."pedido_id" RETURNING "id"
+
+2026/07/13 13:27:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[1.869ms] [34;1m[rows:1][0m UPDATE "pedidos" SET "tenant_id"=1,"comanda_id"=NULL,"mesa_id"=NULL,"status"='pronto',"origem"='balcao',"total"=46.3,"cliente_id"=NULL,"entregador_id"=NULL,"endereco_entrega"='',"cpf_cnpj_cliente"='',"chave_acesso_nfe"='35260712345678000199650010000001161122334455',"url_cupom_fiscal"='https://nfce.fazenda.sp.gov.br/consulta?chave=35260712345678000199650010000001161122334455',"created_at"='2026-07-13 13:12:43.513',"updated_at"='2026-07-13 13:27:31.7' WHERE "id" = 116
+13:27:31 | 200 |    6.697809ms | 127.0.0.1 | PUT | /api/orders/116 | -
+
+2026/07/13 13:27:32 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.260ms] [34;1m[rows:4][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 116
+
+2026/07/13 13:27:32 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[1.026ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE "pedidos"."id" = 116 AND tenant_id = 1 ORDER BY "pedidos"."id" LIMIT 1
+
+2026/07/13 13:27:32 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:724
+[0m[33m[3.074ms] [34;1m[rows:4][0m UPDATE "item_pedidos" SET "status"='despachado',"updated_at"='2026-07-13 13:27:32.444' WHERE pedido_id = 116
+
+2026/07/13 13:27:32 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[0.571ms] [34;1m[rows:4][0m INSERT INTO "item_pedidos" ("tenant_id","pedido_id","produto_id","produto_nome","quantidade","observacao","preco_unitario","status","impresso","setor_id","created_at","updated_at","id") VALUES (1,116,4,'Coca-Cola Lata 350ml',1,'',6.5,'despachado',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:27:31.697',201),(1,116,7,'Soda Sprite',1,'',7,'despachado',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:27:31.697',202),(1,116,5,'Suco de Laranja Natural 500ml',1,'',9.9,'despachado',false,2,'2026-07-13 13:12:43.514','2026-07-13 13:27:31.697',203),(1,116,6,'Petit Gâteau com Sorvete',1,'',22.9,'despachado',false,4,'2026-07-13 13:12:43.514','2026-07-13 13:27:31.697',204) ON CONFLICT ("id") DO UPDATE SET "pedido_id"="excluded"."pedido_id" RETURNING "id"
+
+2026/07/13 13:27:32 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[2.056ms] [34;1m[rows:1][0m UPDATE "pedidos" SET "tenant_id"=1,"comanda_id"=NULL,"mesa_id"=NULL,"status"='despachado',"origem"='balcao',"total"=46.3,"cliente_id"=NULL,"entregador_id"=NULL,"endereco_entrega"='',"cpf_cnpj_cliente"='',"chave_acesso_nfe"='35260712345678000199650010000001161122334455',"url_cupom_fiscal"='https://nfce.fazenda.sp.gov.br/consulta?chave=35260712345678000199650010000001161122334455',"created_at"='2026-07-13 13:12:43.513',"updated_at"='2026-07-13 13:27:32.447' WHERE "id" = 116
+13:27:32 | 200 |    7.619746ms | 127.0.0.1 | PUT | /api/orders/116 | -
+
+2026/07/13 13:27:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.539ms] [34;1m[rows:3][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 115
+
+2026/07/13 13:27:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[1.746ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:32 | 200 |     1.86513ms | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.357ms] [34;1m[rows:3][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 115
+
+2026/07/13 13:27:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.969ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE "pedidos"."id" = 115 AND tenant_id = 1 ORDER BY "pedidos"."id" LIMIT 1
+
+2026/07/13 13:27:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:724
+[0m[33m[2.594ms] [34;1m[rows:3][0m UPDATE "item_pedidos" SET "status"='produzindo',"updated_at"='2026-07-13 13:27:33.928' WHERE pedido_id = 115
+
+2026/07/13 13:27:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[0.658ms] [34;1m[rows:3][0m INSERT INTO "item_pedidos" ("tenant_id","pedido_id","produto_id","produto_nome","quantidade","observacao","preco_unitario","status","impresso","setor_id","created_at","updated_at","id") VALUES (1,115,4,'Coca-Cola Lata 350ml',1,'',6.5,'produzindo',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:12:13.096',198),(1,115,7,'Soda Sprite',1,'',7,'produzindo',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:12:13.096',199),(1,115,5,'Suco de Laranja Natural 500ml',1,'',9.9,'produzindo',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:12:13.096',200) ON CONFLICT ("id") DO UPDATE SET "pedido_id"="excluded"."pedido_id" RETURNING "id"
+
+2026/07/13 13:27:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[2.048ms] [34;1m[rows:1][0m UPDATE "pedidos" SET "tenant_id"=1,"comanda_id"=NULL,"mesa_id"=NULL,"status"='produzindo',"origem"='balcao',"total"=23.4,"cliente_id"=NULL,"entregador_id"=NULL,"endereco_entrega"='',"cpf_cnpj_cliente"='',"chave_acesso_nfe"='35260712345678000199650010000001151122334455',"url_cupom_fiscal"='https://nfce.fazenda.sp.gov.br/consulta?chave=35260712345678000199650010000001151122334455',"created_at"='2026-07-13 13:12:13.095',"updated_at"='2026-07-13 13:27:33.931' WHERE "id" = 115
+13:27:33 | 200 |    6.304646ms | 127.0.0.1 | PUT | /api/orders/115 | -
+
+2026/07/13 13:27:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.218ms] [34;1m[rows:3][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 115
+
+2026/07/13 13:27:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.714ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE "pedidos"."id" = 115 AND tenant_id = 1 ORDER BY "pedidos"."id" LIMIT 1
+
+2026/07/13 13:27:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:724
+[0m[33m[3.082ms] [34;1m[rows:3][0m UPDATE "item_pedidos" SET "status"='pronto',"updated_at"='2026-07-13 13:27:34.352' WHERE pedido_id = 115
+
+2026/07/13 13:27:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[0.588ms] [34;1m[rows:3][0m INSERT INTO "item_pedidos" ("tenant_id","pedido_id","produto_id","produto_nome","quantidade","observacao","preco_unitario","status","impresso","setor_id","created_at","updated_at","id") VALUES (1,115,4,'Coca-Cola Lata 350ml',1,'',6.5,'pronto',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:27:33.928',198),(1,115,7,'Soda Sprite',1,'',7,'pronto',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:27:33.928',199),(1,115,5,'Suco de Laranja Natural 500ml',1,'',9.9,'pronto',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:27:33.928',200) ON CONFLICT ("id") DO UPDATE SET "pedido_id"="excluded"."pedido_id" RETURNING "id"
+
+2026/07/13 13:27:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[2.069ms] [34;1m[rows:1][0m UPDATE "pedidos" SET "tenant_id"=1,"comanda_id"=NULL,"mesa_id"=NULL,"status"='pronto',"origem"='balcao',"total"=23.4,"cliente_id"=NULL,"entregador_id"=NULL,"endereco_entrega"='',"cpf_cnpj_cliente"='',"chave_acesso_nfe"='35260712345678000199650010000001151122334455',"url_cupom_fiscal"='https://nfce.fazenda.sp.gov.br/consulta?chave=35260712345678000199650010000001151122334455',"created_at"='2026-07-13 13:12:13.095',"updated_at"='2026-07-13 13:27:34.355' WHERE "id" = 115
+13:27:33 | 200 |    6.750003ms | 127.0.0.1 | PUT | /api/orders/115 | -
+
+2026/07/13 13:27:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.182ms] [34;1m[rows:3][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" = 115
+
+2026/07/13 13:27:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:716
+[0m[33m[0.606ms] [34;1m[rows:1][0m SELECT * FROM "pedidos" WHERE "pedidos"."id" = 115 AND tenant_id = 1 ORDER BY "pedidos"."id" LIMIT 1
+
+2026/07/13 13:27:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:724
+[0m[33m[3.041ms] [34;1m[rows:3][0m UPDATE "item_pedidos" SET "status"='despachado',"updated_at"='2026-07-13 13:27:35.01' WHERE pedido_id = 115
+
+2026/07/13 13:27:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[0.540ms] [34;1m[rows:3][0m INSERT INTO "item_pedidos" ("tenant_id","pedido_id","produto_id","produto_nome","quantidade","observacao","preco_unitario","status","impresso","setor_id","created_at","updated_at","id") VALUES (1,115,4,'Coca-Cola Lata 350ml',1,'',6.5,'despachado',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:27:34.352',198),(1,115,7,'Soda Sprite',1,'',7,'despachado',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:27:34.352',199),(1,115,5,'Suco de Laranja Natural 500ml',1,'',9.9,'despachado',false,2,'2026-07-13 13:12:13.096','2026-07-13 13:27:34.352',200) ON CONFLICT ("id") DO UPDATE SET "pedido_id"="excluded"."pedido_id" RETURNING "id"
+
+2026/07/13 13:27:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:730
+[0m[33m[2.182ms] [34;1m[rows:1][0m UPDATE "pedidos" SET "tenant_id"=1,"comanda_id"=NULL,"mesa_id"=NULL,"status"='despachado',"origem"='balcao',"total"=23.4,"cliente_id"=NULL,"entregador_id"=NULL,"endereco_entrega"='',"cpf_cnpj_cliente"='',"chave_acesso_nfe"='35260712345678000199650010000001151122334455',"url_cupom_fiscal"='https://nfce.fazenda.sp.gov.br/consulta?chave=35260712345678000199650010000001151122334455',"created_at"='2026-07-13 13:12:13.095',"updated_at"='2026-07-13 13:27:35.013' WHERE "id" = 115
+13:27:34 | 200 |    6.747253ms | 127.0.0.1 | PUT | /api/orders/115 | -
+
+2026/07/13 13:27:36 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.921ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '1' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:35 | 200 |    1.033311ms | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:37 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[1.045ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:37 | 200 |    1.179447ms | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:38 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.472ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '4' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:37 | 200 |     846.333µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:39 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.500ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:39 | 200 |     619.421µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:40 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.480ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '1' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:39 | 200 |     605.976µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:41 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[1.489ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:27:40 | 200 |    1.680602ms | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:27:42 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/caixa_handlers.go:21
+[0m[33m[1.636ms] [34;1m[rows:1][0m SELECT * FROM "caixa_turnos" WHERE status = 'aberto' AND tenant_id = 1 ORDER BY "caixa_turnos"."id" LIMIT 1
+13:27:42 | 200 |    1.759932ms | 127.0.0.1 | GET | /api/caixa/status | -
+
+2026/07/13 13:27:42 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:447
+[0m[33m[1.894ms] [34;1m[rows:4][0m SELECT * FROM "categoria" WHERE tenant_id = 1 ORDER BY nome asc
+13:27:42 | 200 |    2.011594ms | 127.0.0.1 | GET | /api/categories | -
+
+2026/07/13 13:27:42 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:293
+[0m[33m[8.536ms] [34;1m[rows:9][0m SELECT * FROM "produtos" WHERE ativo = true AND tenant_id = 1 ORDER BY nome asc
+13:27:42 | 200 |    8.715457ms | 127.0.0.1 | GET | /api/products | -
+
+2026/07/13 13:27:42 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[9.096ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:27:42 | 200 |    9.206126ms | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:27:42 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:692
+[0m[33m[1.995ms] [34;1m[rows:204][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" IN (116,115,114,113,112,111,110,109,108,107,106,105,104,103,102,101,100,99,98,97,96,95,94,93,92,91,90,89,88,87,86,85,84,83,82,81,80,79,78,77,76,75,74,73,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)
+
+2026/07/13 13:27:42 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:692
+[0m[33m[13.093ms] [34;1m[rows:116][0m SELECT * FROM "pedidos" WHERE tenant_id = 1 ORDER BY created_at desc
+13:27:42 | 200 |   13.666472ms | 127.0.0.1 | GET | /api/orders | -
+
+2026/07/13 13:27:44 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/caixa_handlers.go:356
+[0m[33m[0.986ms] [34;1m[rows:12][0m SELECT * FROM "caixa_turnos" WHERE tenant_id = 1 ORDER BY id desc LIMIT 20
+13:27:44 | 200 |    1.144356ms | 127.0.0.1 | GET | /api/caixa/turnos | -
+
+2026/07/13 13:27:44 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:931
+[0m[33m[1.278ms] [34;1m[rows:1][0m SELECT COALESCE(SUM(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:27:44 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:938
+[0m[33m[0.661ms] [34;1m[rows:1][0m SELECT count(*) FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND tenant_id = 1
+
+2026/07/13 13:27:44 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:945
+[0m[33m[0.624ms] [34;1m[rows:1][0m SELECT count(*) FROM "mesas" WHERE status = 'ocupada' AND tenant_id = 1
+
+2026/07/13 13:27:44 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:953
+[0m[33m[0.838ms] [34;1m[rows:1][0m SELECT COALESCE(AVG(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:27:44 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:968
+[0m[33m[1.374ms] [34;1m[rows:5][0m SELECT produto_nome, SUM(quantidade * preco_unitario) as total_vendido, SUM(quantidade) as quantidade FROM "item_pedidos" WHERE tenant_id = 1 GROUP BY "produto_nome" ORDER BY quantidade desc LIMIT 5
+13:27:44 | 200 |    5.111395ms | 127.0.0.1 | GET | /api/dashboard/stats | -
+
+2026/07/13 13:27:57 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.557ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:56 | 200 |     687.217µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:57 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.503ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:56 | 200 |     635.314µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:57 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.392ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:56 | 200 |     515.943µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:58 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.775ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '1' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:27:58 | 200 |     915.842µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:27:59 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[0.560ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:27:58 | 200 |     702.206µs | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:27:59 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[0.536ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:27:58 | 200 |     694.217µs | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:27:59 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[0.484ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:27:58 | 200 |     640.179µs | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:28:00 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[0.510ms] [34;1m[rows:10][0m SELECT * FROM "caixa_turnos" WHERE "caixa_turnos"."id" IN (12,11,10,9,8,7,6,5,4,3)
+
+2026/07/13 13:28:00 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:226
+[0m[33m[1.170ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:00 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:226
+[0m[33m[3.664ms] [34;1m[rows:4][0m SELECT * FROM "conta_pagars" WHERE tenant_id = 1 ORDER BY data_vencimento asc
+13:28:00 | 200 |     3.87981ms | 127.0.0.1 | GET | /api/contas-pagar | -
+
+2026/07/13 13:28:00 [32m
+[0m[33m[1.245ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:00 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[2.527ms] [34;1m[rows:1][0m SELECT * FROM "conta_pagars" WHERE "conta_pagars"."id" = 3
+
+2026/07/13 13:28:00 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[5.343ms] [34;1m[rows:13][0m SELECT * FROM "lancamento_financeiros" WHERE tenant_id = 1 ORDER BY data desc
+13:28:00 | 200 |     5.55223ms | 127.0.0.1 | GET | /api/financeiro/extrato | -
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:261
+[0m[33m[0.786ms] [34;1m[rows:1][0m SELECT * FROM "conta_pagars" WHERE "conta_pagars"."id" = 4 AND tenant_id = 1 ORDER BY "conta_pagars"."id" LIMIT 1
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:268
+[0m[33m[4.080ms] [34;1m[rows:1][0m UPDATE "conta_pagars" SET "tenant_id"=1,"fornecedor_id"=1,"compra_id"=4,"descricao"='NF: 456459156156056',"valor"=55,"data_vencimento"='2026-07-30 21:00:00',"status"='paga',"created_at"='2026-07-11 11:57:14.301',"updated_at"='2026-07-13 13:28:18.566' WHERE "id" = 4
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:284
+[0m[33m[2.738ms] [34;1m[rows:1][0m INSERT INTO "lancamento_financeiros" ("tenant_id","tipo","categoria","descricao","valor","data","caixa_turno_id","conta_pagar_id","created_at","updated_at") VALUES (1,'despesa','pagamento_fornecedor','Pagamento de Conta: NF: 456459156156056',55,'2026-07-13 13:28:18.57',NULL,4,'2026-07-13 13:28:18.57','2026-07-13 13:28:18.57') RETURNING "id"
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:286
+[0m[33m[0.201ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:286
+[0m[33m[0.745ms] [34;1m[rows:1][0m SELECT * FROM "conta_pagars" WHERE "conta_pagars"."id" = 4 AND tenant_id = 1 AND "conta_pagars"."id" = 4 ORDER BY "conta_pagars"."id" LIMIT 1
+13:28:18 | 200 |     8.71268ms | 127.0.0.1 | PUT | /api/contas-pagar/4/pay | -
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:226
+[0m[33m[0.353ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:226
+[0m[33m[1.356ms] [34;1m[rows:4][0m SELECT * FROM "conta_pagars" WHERE tenant_id = 1 ORDER BY data_vencimento asc
+13:28:18 | 200 |    1.455467ms | 127.0.0.1 | GET | /api/contas-pagar | -
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[0.509ms] [34;1m[rows:10][0m SELECT * FROM "caixa_turnos" WHERE "caixa_turnos"."id" IN (12,11,10,9,8,7,6,5,4,3)
+
+2026/07/13 13:28:18 [32m
+[0m[33m[0.214ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[0.643ms] [34;1m[rows:2][0m SELECT * FROM "conta_pagars" WHERE "conta_pagars"."id" IN (4,3)
+
+2026/07/13 13:28:18 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[2.962ms] [34;1m[rows:14][0m SELECT * FROM "lancamento_financeiros" WHERE tenant_id = 1 ORDER BY data desc
+13:28:18 | 200 |    3.094462ms | 127.0.0.1 | GET | /api/financeiro/extrato | -
+
+2026/07/13 13:28:23 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:20
+[0m[33m[1.307ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE tenant_id = 1
+13:28:23 | 200 |     1.62196ms | 127.0.0.1 | GET | /api/fornecedores | -
+
+2026/07/13 13:28:23 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:109
+[0m[33m[0.514ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:23 [32m
+[0m[33m[0.843ms] [34;1m[rows:2][0m SELECT * FROM "produtos" WHERE "produtos"."id" IN (8,9)
+
+2026/07/13 13:28:23 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:109
+[0m[33m[6.005ms] [34;1m[rows:4][0m SELECT * FROM "compra_items" WHERE "compra_items"."compra_id" IN (4,3,1,2)
+
+2026/07/13 13:28:23 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:109
+[0m[33m[8.760ms] [34;1m[rows:4][0m SELECT * FROM "compras" WHERE tenant_id = 1 ORDER BY data_compra desc
+13:28:23 | 200 |    8.958527ms | 127.0.0.1 | GET | /api/compras | -
+
+2026/07/13 13:28:23 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:293
+[0m[33m[14.088ms] [34;1m[rows:9][0m SELECT * FROM "produtos" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:23 | 200 |   14.308579ms | 127.0.0.1 | GET | /api/products | -
+
+2026/07/13 13:28:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:226
+[0m[33m[0.577ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[0.414ms] [34;1m[rows:10][0m SELECT * FROM "caixa_turnos" WHERE "caixa_turnos"."id" IN (12,11,10,9,8,7,6,5,4,3)
+
+2026/07/13 13:28:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:226
+[0m[33m[1.666ms] [34;1m[rows:4][0m SELECT * FROM "conta_pagars" WHERE tenant_id = 1 ORDER BY data_vencimento asc
+13:28:23 | 200 |    1.803379ms | 127.0.0.1 | GET | /api/contas-pagar | -
+
+2026/07/13 13:28:24 [32m
+[0m[33m[0.243ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[0.767ms] [34;1m[rows:2][0m SELECT * FROM "conta_pagars" WHERE "conta_pagars"."id" IN (4,3)
+
+2026/07/13 13:28:24 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/financeiro_handlers.go:22
+[0m[33m[2.409ms] [34;1m[rows:14][0m SELECT * FROM "lancamento_financeiros" WHERE tenant_id = 1 ORDER BY data desc
+13:28:23 | 200 |    2.537935ms | 127.0.0.1 | GET | /api/financeiro/extrato | -
+
+2026/07/13 13:28:29 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:20
+[0m[33m[0.951ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE tenant_id = 1
+13:28:29 | 200 |    1.107465ms | 127.0.0.1 | GET | /api/fornecedores | -
+
+2026/07/13 13:28:29 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:109
+[0m[33m[0.618ms] [34;1m[rows:1][0m SELECT * FROM "fornecedors" WHERE "fornecedors"."id" = 1
+
+2026/07/13 13:28:29 [32m
+[0m[33m[1.350ms] [34;1m[rows:2][0m SELECT * FROM "produtos" WHERE "produtos"."id" IN (8,9)
+
+2026/07/13 13:28:29 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:109
+[0m[33m[3.680ms] [34;1m[rows:4][0m SELECT * FROM "compra_items" WHERE "compra_items"."compra_id" IN (4,3,1,2)
+
+2026/07/13 13:28:29 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/erp_handlers.go:109
+[0m[33m[6.473ms] [34;1m[rows:4][0m SELECT * FROM "compras" WHERE tenant_id = 1 ORDER BY data_compra desc
+13:28:29 | 200 |    6.589474ms | 127.0.0.1 | GET | /api/compras | -
+
+2026/07/13 13:28:29 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:293
+[0m[33m[11.202ms] [34;1m[rows:9][0m SELECT * FROM "produtos" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:29 | 200 |   11.338298ms | 127.0.0.1 | GET | /api/products | -
+
+2026/07/13 13:28:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:293
+[0m[33m[1.043ms] [34;1m[rows:9][0m SELECT * FROM "produtos" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:29 | 200 |    1.244763ms | 127.0.0.1 | GET | /api/products | -
+
+2026/07/13 13:28:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:1016
+[0m[33m[1.649ms] [34;1m[rows:8][0m SELECT estoques.id, estoques.produto_id, produtos.nome as produto_nome, estoques.quantidade, estoques.minimo, estoques.alerta, produtos.preco as preco_unitario, produtos.tipo as produto_tipo, produtos.unidade_medida as unidade_medida FROM "estoques" join produtos on produtos.id = estoques.produto_id WHERE estoques.tenant_id = 1
+13:28:29 | 200 |    1.871755ms | 127.0.0.1 | GET | /api/stock | -
+
+2026/07/13 13:28:30 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:447
+[0m[33m[13.036ms] [34;1m[rows:4][0m SELECT * FROM "categoria" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:29 | 200 |   13.191841ms | 127.0.0.1 | GET | /api/categories | -
+
+2026/07/13 13:28:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:781
+[0m[33m[0.692ms] [34;1m[rows:4][0m SELECT * FROM "setors" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:31 | 200 |      812.22µs | 127.0.0.1 | GET | /api/setores | -
+
+2026/07/13 13:28:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.752ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '4' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:28:31 | 200 |     844.534µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:28:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.424ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '4' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:28:31 | 200 |     552.512µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:28:31 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.405ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '4' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:28:31 | 200 |     525.856µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:28:32 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.418ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '2' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:28:31 | 200 |     527.922µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:28:32 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:768
+[0m[33m[0.412ms] [34;1m[rows:0][0m SELECT * FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND (id IN (SELECT pedido_id FROM item_pedidos WHERE setor_id = '1' OR setor_id = 0)) AND tenant_id = 1 ORDER BY created_at asc
+13:28:32 | 200 |     534.094µs | 127.0.0.1 | GET | /api/kds | -
+
+2026/07/13 13:28:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[0.528ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:28:33 | 200 |     657.111µs | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:28:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[0.645ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:28:33 | 200 |      821.02µs | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:28:33 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[0.401ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:28:33 | 200 |     553.271µs | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:447
+[0m[33m[0.648ms] [34;1m[rows:4][0m SELECT * FROM "categoria" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:33 | 200 |     817.553µs | 127.0.0.1 | GET | /api/categories | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:293
+[0m[33m[1.222ms] [34;1m[rows:9][0m SELECT * FROM "produtos" WHERE ativo = true AND tenant_id = 1 ORDER BY nome asc
+13:28:33 | 200 |    1.401407ms | 127.0.0.1 | GET | /api/products | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:225
+[0m[33m[7.759ms] [34;1m[rows:16][0m SELECT * FROM "mesas" WHERE tenant_id = 1 ORDER BY numero asc
+13:28:33 | 200 |    7.982027ms | 127.0.0.1 | GET | /api/tables | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/caixa_handlers.go:21
+[0m[33m[12.280ms] [34;1m[rows:1][0m SELECT * FROM "caixa_turnos" WHERE status = 'aberto' AND tenant_id = 1 ORDER BY "caixa_turnos"."id" LIMIT 1
+13:28:33 | 200 |   12.535075ms | 127.0.0.1 | GET | /api/caixa/status | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:692
+[0m[33m[2.883ms] [34;1m[rows:204][0m SELECT * FROM "item_pedidos" WHERE "item_pedidos"."pedido_id" IN (116,115,114,113,112,111,110,109,108,107,106,105,104,103,102,101,100,99,98,97,96,95,94,93,92,91,90,89,88,87,86,85,84,83,82,81,80,79,78,77,76,75,74,73,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,47,46,45,44,43,42,41,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1)
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:692
+[0m[33m[15.211ms] [34;1m[rows:116][0m SELECT * FROM "pedidos" WHERE tenant_id = 1 ORDER BY created_at desc
+13:28:33 | 200 |   16.041111ms | 127.0.0.1 | GET | /api/orders | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/caixa_handlers.go:356
+[0m[33m[1.345ms] [34;1m[rows:12][0m SELECT * FROM "caixa_turnos" WHERE tenant_id = 1 ORDER BY id desc LIMIT 20
+13:28:34 | 200 |    1.513176ms | 127.0.0.1 | GET | /api/caixa/turnos | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:931
+[0m[33m[2.459ms] [34;1m[rows:1][0m SELECT COALESCE(SUM(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:938
+[0m[33m[1.417ms] [34;1m[rows:1][0m SELECT count(*) FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:945
+[0m[33m[0.725ms] [34;1m[rows:1][0m SELECT count(*) FROM "mesas" WHERE status = 'ocupada' AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:953
+[0m[33m[0.443ms] [34;1m[rows:1][0m SELECT COALESCE(AVG(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:968
+[0m[33m[1.864ms] [34;1m[rows:5][0m SELECT produto_nome, SUM(quantidade * preco_unitario) as total_vendido, SUM(quantidade) as quantidade FROM "item_pedidos" WHERE tenant_id = 1 GROUP BY "produto_nome" ORDER BY quantidade desc LIMIT 5
+13:28:34 | 200 |    7.221109ms | 127.0.0.1 | GET | /api/dashboard/stats | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:931
+[0m[33m[0.756ms] [34;1m[rows:1][0m SELECT COALESCE(SUM(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:938
+[0m[33m[0.338ms] [34;1m[rows:1][0m SELECT count(*) FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:945
+[0m[33m[0.190ms] [34;1m[rows:1][0m SELECT count(*) FROM "mesas" WHERE status = 'ocupada' AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:953
+[0m[33m[0.202ms] [34;1m[rows:1][0m SELECT COALESCE(AVG(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:968
+[0m[33m[0.412ms] [34;1m[rows:5][0m SELECT produto_nome, SUM(quantidade * preco_unitario) as total_vendido, SUM(quantidade) as quantidade FROM "item_pedidos" WHERE tenant_id = 1 GROUP BY "produto_nome" ORDER BY quantidade desc LIMIT 5
+13:28:34 | 200 |    2.236628ms | 127.0.0.1 | GET | /api/dashboard/stats | -
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:931
+[0m[33m[0.767ms] [34;1m[rows:1][0m SELECT COALESCE(SUM(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:938
+[0m[33m[0.385ms] [34;1m[rows:1][0m SELECT count(*) FROM "pedidos" WHERE status IN ('recebido','produzindo','pronto') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:945
+[0m[33m[0.250ms] [34;1m[rows:1][0m SELECT count(*) FROM "mesas" WHERE status = 'ocupada' AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:953
+[0m[33m[0.223ms] [34;1m[rows:1][0m SELECT COALESCE(AVG(total), 0) FROM "pedidos" WHERE (created_at >= '2026-07-12 21:00:00' AND status = 'entregue') AND tenant_id = 1
+
+2026/07/13 13:28:34 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:968
+[0m[33m[0.432ms] [34;1m[rows:5][0m SELECT produto_nome, SUM(quantidade * preco_unitario) as total_vendido, SUM(quantidade) as quantidade FROM "item_pedidos" WHERE tenant_id = 1 GROUP BY "produto_nome" ORDER BY quantidade desc LIMIT 5
+13:28:34 | 200 |    2.387248ms | 127.0.0.1 | GET | /api/dashboard/stats | -
+
+2026/07/13 13:28:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:293
+[0m[33m[0.848ms] [34;1m[rows:9][0m SELECT * FROM "produtos" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:35 | 200 |    1.020285ms | 127.0.0.1 | GET | /api/products | -
+
+2026/07/13 13:28:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:1258
+[0m[33m[1.886ms] [34;1m[rows:4][0m SELECT * FROM "usuarios" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:35 | 200 |    2.080468ms | 127.0.0.1 | GET | /api/users | -
+
+2026/07/13 13:28:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:447
+[0m[33m[8.918ms] [34;1m[rows:4][0m SELECT * FROM "categoria" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:35 | 200 |    9.079732ms | 127.0.0.1 | GET | /api/categories | -
+
+2026/07/13 13:28:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:781
+[0m[33m[9.267ms] [34;1m[rows:4][0m SELECT * FROM "setors" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:35 | 200 |    9.376506ms | 127.0.0.1 | GET | /api/setores | -
+
+2026/07/13 13:28:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:1828
+[0m[33m[9.336ms] [34;1m[rows:1][0m SELECT * FROM "pinpads" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:35 | 200 |    9.498633ms | 127.0.0.1 | GET | /api/pinpads | -
+
+2026/07/13 13:28:35 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/handlers.go:1605
+[0m[33m[10.426ms] [34;1m[rows:4][0m SELECT * FROM "impressoras" WHERE tenant_id = 1 ORDER BY nome asc
+13:28:35 | 200 |   10.596121ms | 127.0.0.1 | GET | /api/printers | -
+
+2026/07/13 13:28:41 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/permission_handlers.go:22
+[0m[33m[1.407ms] [34;1m[rows:25][0m SELECT * FROM "role_permissions" WHERE tenant_id = 1
+13:28:40 | 200 |     1.59219ms | 127.0.0.1 | GET | /api/permissoes | -
+
+2026/07/13 13:29:02 [32m/home/humberto/Aplicativos/Manager-Restaurante-main/backend/internal/handlers/permission_handlers.go:22
+[0m[33m[0.662ms] [34;1m[rows:25][0m SELECT * FROM "role_permissions" WHERE tenant_id = 1
+13:29:02 | 200 |     828.807µs | 127.0.0.1 | GET | /api/permissoes | -
