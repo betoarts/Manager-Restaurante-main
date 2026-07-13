@@ -108,6 +108,7 @@ func main() {
 
 	// Impressoras (ESC/POS Printers - TCP and USB)
 	protected.Get("/printers", handlers.HandleGetPrinters)
+	protected.Get("/printers/detect-usb", handlers.HandleDetectUSBDevices) // must be before /:id routes
 	protected.Post("/printers", handlers.HandleCreatePrinter)
 	protected.Put("/printers/:id", handlers.HandleUpdatePrinter)
 	protected.Delete("/printers/:id", handlers.HandleDeletePrinter)

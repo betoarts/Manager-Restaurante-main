@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"log"
 	"manager-restaurant/backend/internal/domain"
-	"manager-restaurant/backend/pkg/middleware"
+	"manager-restaurant/backend/internal/services"
 	"manager-restaurant/backend/pkg/database"
+	"manager-restaurant/backend/pkg/middleware"
 	"strconv"
 	"time"
 
@@ -71,6 +73,13 @@ func HandleAbrirCaixa(c *fiber.Ctx) error {
 	}
 	db.Create(&lancamento)
 
+	// Imprimir comprovante de abertura do caixa em background
+	go func(tid uint, turID uint) {
+		if err := services.PrintCaixaAbertura(tid, turID); err != nil {
+			log.Printf("[CAIXA PRINT ERROR] falha ao imprimir abertura do caixa: %v", err)
+		}
+	}(tenantID, turno.ID)
+
 	return c.JSON(turno)
 }
 
@@ -122,6 +131,13 @@ func HandleFecharCaixa(c *fiber.Ctx) error {
 		}
 		db.Create(&lancamento)
 	}
+
+	// Imprimir relatório de fechamento do caixa em background
+	go func(tid uint, turID uint) {
+		if err := services.PrintCaixaFechamento(tid, turID); err != nil {
+			log.Printf("[CAIXA PRINT ERROR] falha ao imprimir fechamento do caixa: %v", err)
+		}
+	}(tenantID, turno.ID)
 
 	return c.JSON(turno)
 }

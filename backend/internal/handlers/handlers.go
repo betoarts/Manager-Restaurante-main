@@ -819,6 +819,13 @@ func HandleProcessPayment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to record payment"})
 	}
 
+	// Trigger cashier print of payment receipt asynchronously
+	go func(tID uint, payID uint) {
+		if err := services.PrintPaymentReceipt(tID, payID); err != nil {
+			log.Printf("[PRINT RECEIPT ERROR] Failed to print receipt for payment %d: %v", payID, err)
+		}
+	}(tenantID, payment.ID)
+
 	// Update order or table status if paid
 	if req.PedidoID != nil {
 		var order domain.Pedido
@@ -1724,13 +1731,47 @@ func HandleTestPrinter(c *fiber.Ctx) error {
 	data = append(data, []byte{0x1D, 0x56, 0x41, 0x03}...) // Cut
 
 	if err := services.TestPrinter(&printer, data); err != nil {
-		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
+		log.Printf("[PRINTER TEST] Failed to send test page to %s: %v", printer.Nome, err)
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"success": false,
 			"error":   err.Error(),
 		})
 	}
 
 	return c.JSON(fiber.Map{"success": true, "message": "Página de teste enviada com sucesso!"})
+}
+
+// HandleDetectUSBDevices scans the host system for available printer USB devices
+// GET /api/printers/detect-usb — no printer ID needed, scans /dev/usb/lp*, /dev/lp*, /dev/ttyUSB*, /dev/ttyACM* and sysfs
+func HandleDetectUSBDevices(c *fiber.Ctx) error {
+	devices := services.DetectUSBDevices()
+
+	// Build setup instructions based on what was found
+	setup := ""
+	hasInaccessible := false
+	hasNoPath := false
+	for _, d := range devices {
+		if !d.Accessible && d.Path != "" {
+			hasInaccessible = true
+		}
+		if d.Path == "" {
+			hasNoPath = true
+		}
+	}
+
+	if len(devices) == 0 || hasNoPath {
+		setup = "Impressora USB detectada mas sem device file. Execute: sudo modprobe usblp && ls /dev/usb/"
+	} else if hasInaccessible {
+		setup = "Device encontrado mas sem permissão de escrita. Execute: sudo chmod 666 /dev/usb/lp0 (ou o path correto)"
+	} else if len(devices) > 0 {
+		setup = "Impressora pronta! Selecione o device e salve."
+	}
+
+	return c.JSON(fiber.Map{
+		"devices": devices,
+		"count":   len(devices),
+		"setup":   setup,
+	})
 }
 
 // ========== Pinpad (TEF/Cielo) Handlers ==========

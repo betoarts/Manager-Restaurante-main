@@ -414,6 +414,8 @@ export const Configuracoes: React.FC = () => {
   const [printerSetorID, setPrinterSetorID] = useState<number>(0);
   const [testingPrinterId, setTestingPrinterId] = useState<number | null>(null);
   const [printerTestResult, setPrinterTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null);
+  const [detectedUSBDevices, setDetectedUSBDevices] = useState<Array<{ path: string; model: string; vendor_id: string; product_id: string; accessible: boolean }>>([]);
+  const [usbSetupMsg, setUsbSetupMsg] = useState('');
 
   // Fetch Printers List from real API
   const { data: printers = [], refetch: refetchPrinters } = useQuery<Impressora[]>({
@@ -452,6 +454,8 @@ export const Configuracoes: React.FC = () => {
     setPrinterDispositivo('/dev/usb/lp0');
     setPrinterSetorID(setores[0]?.id || 0);
     setSelectedPrinter(null);
+    setDetectedUSBDevices([]);
+    setUsbSetupMsg('');
   };
 
   const handleOpenCreatePrinter = () => {
@@ -941,17 +945,102 @@ export const Configuracoes: React.FC = () => {
                       />
                     </>
                   ) : (
-                    <TextField
-                      label="Caminho do Dispositivo USB"
-                      fullWidth
-                      value={printerDispositivo}
-                      onChange={(e) => setPrinterDispositivo(e.target.value)}
-                      placeholder="/dev/usb/lp0"
-                      helperText="Linux: /dev/usb/lp0, /dev/usb/lp1... Verifique com: ls /dev/usb/"
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start">dev</InputAdornment>,
-                      }}
-                    />
+                    <Box>
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                        <TextField
+                          label="Caminho do Dispositivo USB"
+                          fullWidth
+                          value={printerDispositivo}
+                          onChange={(e) => setPrinterDispositivo(e.target.value)}
+                          placeholder="/dev/usb/lp0"
+                          helperText="Ex: /dev/usb/lp0, /dev/lp0, /dev/ttyUSB0"
+                          InputProps={{
+                            startAdornment: <InputAdornment position="start">/dev/</InputAdornment>,
+                          }}
+                        />
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{ mt: 1, minWidth: 110, whiteSpace: 'nowrap' }}
+                          startIcon={<RefreshCw size={14} />}
+                          onClick={async () => {
+                            try {
+                              const result = await api.get<{
+                                devices: Array<{ path: string; model: string; vendor_id: string; product_id: string; accessible: boolean }>;
+                                count: number;
+                                setup: string;
+                              }>('/api/printers/detect-usb');
+                              setDetectedUSBDevices(result.devices);
+                              setUsbSetupMsg(result.setup);
+                            } catch {
+                              setDetectedUSBDevices([]);
+                              setUsbSetupMsg('Erro ao consultar devices. Backend rodando?');
+                            }
+                          }}
+                        >
+                          Detectar
+                        </Button>
+                      </Box>
+
+                      {usbSetupMsg && (
+                        <Alert
+                          severity={detectedUSBDevices.some(d => d.accessible) ? 'success' : detectedUSBDevices.length > 0 ? 'warning' : 'info'}
+                          sx={{ mt: 1, py: 0.5, fontSize: '0.78rem' }}
+                        >
+                          {usbSetupMsg}
+                        </Alert>
+                      )}
+
+                      {detectedUSBDevices.length > 0 && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+                            Devices encontrados — clique para selecionar:
+                          </Typography>
+                          <Stack direction="column" spacing={0.5}>
+                            {detectedUSBDevices.map((dev) => (
+                              <Box
+                                key={dev.path || dev.vendor_id}
+                                onClick={() => dev.path && setPrinterDispositivo(dev.path)}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1,
+                                  p: 1,
+                                  borderRadius: 1.5,
+                                  border: `1px solid`,
+                                  borderColor: printerDispositivo === dev.path ? 'success.main' : 'divider',
+                                  bgcolor: printerDispositivo === dev.path ? 'success.main' + '18' : 'background.default',
+                                  cursor: dev.path ? 'pointer' : 'default',
+                                  '&:hover': { bgcolor: dev.path ? 'action.hover' : undefined },
+                                }}
+                              >
+                                <Box sx={{ flex: 1 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    🖨️ {dev.model}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                                    {dev.path || '⚠️ Sem device file (execute: sudo modprobe usblp)'}
+                                    {dev.vendor_id && ` · ${dev.vendor_id}:${dev.product_id}`}
+                                  </Typography>
+                                </Box>
+                                <Chip
+                                  label={dev.accessible ? 'OK' : dev.path ? 'Sem permissão' : 'Sem driver'}
+                                  size="small"
+                                  color={dev.accessible ? 'success' : 'warning'}
+                                  variant="outlined"
+                                  sx={{ fontSize: '0.65rem', fontWeight: 700 }}
+                                />
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+                      {detectedUSBDevices.length === 0 && usbSetupMsg === '' && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                          Clique em "Detectar" para escanear os devices USB disponíveis no servidor
+                        </Typography>
+                      )}
+                    </Box>
                   )}
 
                   <TextField
