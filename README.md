@@ -2,7 +2,7 @@
 
 > Plataforma integrada de gestão para restaurantes, com PDV, KDS, mesas, estoque, pagamentos e operação em tempo real.
 
-![Manager Restaurante — ERP, PDV, KDS e Estoque](https://github.com/betoarts/Manager-Restaurante-main/raw/main/docs/manager-restaurante-cover.png)
+![Manager Restaurante — ERP, PDV, KDS e Estoque](https://github.com/betoarts/Manager-Restaurante-main/raw/main/docs/manager-restaurante-cover.jpg)
 
 [![Go](https://img.shields.io/badge/Go-1.26.1-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=20232a)](https://react.dev/)
@@ -236,7 +236,7 @@ Consulte o código dos handlers em `backend/internal/handlers` para conferir con
 | `npm run build` | Gera o build de produção do frontend |
 | `npm run lint` | Executa a análise estática do frontend |
 | `./abrir-firewall-linux.sh` | Exibe/aplica regras de firewall no Linux |
-| `.\\abrir-firewall.ps1` | Aplica regras de firewall no Windows |
+| `.\\\\abrir-firewall.ps1` | Aplica regras de firewall no Windows |
 
 ## Contribuição
 
