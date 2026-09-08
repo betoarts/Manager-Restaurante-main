@@ -1,109 +1,125 @@
-# Manager Restaurante — ERP & PDV SaaS
+# Manager Restaurante
 
-Sistema completo de gestão para restaurantes com PDV (Ponto de Venda), KDS (Kitchen Display System) setorizado, controle de mesas com mapa interativo, integração TEF/Pinpad, estoque e impressão ESC/POS.
+> Plataforma integrada de gestão para restaurantes, com PDV, KDS, mesas, estoque, pagamentos e operação em tempo real.
+
+![Manager Restaurante — ERP, PDV, KDS e Estoque](https://github.com/betoarts/Manager-Restaurante-main/raw/main/docs/manager-restaurante-cover.png)
+
+[![Go](https://img.shields.io/badge/Go-1.26.1-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=20232a)](https://react.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+O **Manager Restaurante** foi projetado para centralizar a operação de restaurantes em uma única plataforma. O sistema conecta atendimento, caixa, cozinha, bar, estoque e gestão, reduzindo retrabalho e oferecendo visibilidade em tempo real sobre pedidos, mesas e vendas.
+
+> **Status:** em desenvolvimento ativo. Antes de usar em produção, revise credenciais, integrações TEF, impressoras, regras fiscais e políticas de segurança.
+
+## Principais recursos
+
+- **PDV completo:** cardápio, carrinho, mesas, comandas, pedidos e múltiplos meios de pagamento.
+- **Mapa interativo de mesas:** visualização por status, capacidade, formato e posicionamento drag-and-drop.
+- **KDS setorizado:** telas independentes para cozinha, bar e sobremesas, com fluxo de produção e despacho.
+- **Gestão de caixa:** abertura, fechamento, auditoria e bloqueio de operações quando o caixa está fechado.
+- **Estoque:** saldos, estoque mínimo, ajustes manuais, movimentações e baixa automática por venda.
+- **Impressão ESC/POS:** roteamento por setor, impressão TCP/USB e fallback para impressora alternativa.
+- **TEF e pinpads:** suporte a comunicação serial/USB e TCP, incluindo modo simulado para desenvolvimento.
+- **Dashboard gerencial:** vendas do dia, pedidos ativos, mesas ocupadas, ticket médio e produtos mais vendidos.
+- **Tempo real:** WebSocket integrado ao Redis Pub/Sub para sincronização entre telas e instâncias.
+- **Multiempresa:** isolamento por tenant e permissões configuráveis por função.
+- **Tema por empresa:** personalização de cores e modo claro/escuro.
+- **Operação mobile:** interface adaptada para garçons e dispositivos móveis.
+- **Integração WhatsApp:** gerenciamento de sessão, QR Code, mensagens e status em tempo real.
+- **Diretório de TI:** cadastro de infraestrutura e ativos, incluindo preenchimento por XML de notas fiscais.
 
 ## Arquitetura
 
 ```
 manager-restaurante/
-├── backend/                  # API Go + Fiber
-│   ├── cmd/api/main.go       # Entrypoint do servidor
+├── backend/
+│   ├── cmd/api/main.go          # Entrypoint da API
 │   ├── internal/
-│   │   ├── domain/models.go  # Modelos GORM (18 entidades)
-│   │   ├── handlers/         # Handlers HTTP (auth, mesas, pedidos, pagamentos, produtos, pinpad, etc.)
-│   │   ├── services/         # Serviços: impressão ESC/POS, pinpad TEF serial/TCP
-│   │   └── websocket/        # Hub WebSocket com Redis Pub/Sub
+│   │   ├── domain/              # Modelos e regras de domínio
+│   │   ├── handlers/            # Rotas e handlers HTTP
+│   │   ├── services/            # Impressão, TEF e serviços de negócio
+│   │   └── websocket/           # Hub de comunicação em tempo real
 │   └── pkg/
-│       ├── database/         # Conexão PostgreSQL + AutoMigrate + Migrações + Seed
-│       ├── middleware/        # JWT Auth + Tenant Scope + RBAC
-│       └── redis/            # Conexão Redis
-├── frontend/                 # React 19 + TypeScript + Vite
+│       ├── database/             # PostgreSQL, migrações e seed
+│       ├── middleware/           # JWT, tenant scope e RBAC
+│       └── redis/                # Conexão e Pub/Sub
+├── frontend/
 │   └── src/
-│       ├── components/       # Layout com drawer responsivo
-│       ├── pages/            # Dashboard, PDV, KDS, Estoque, Config, GarcomMobile
-│       ├── store/            # Zustand (auth, cart, mesas, KDS, WebSocket)
-│       ├── types/            # Tipos TypeScript
-│       └── utils/            # API client com proxy Vite
-├── start.sh                  # Script de inicialização rápida (Linux)
-├── abrir-firewall-linux.sh   # Liberar portas no firewall (ufw)
-├── abrir-firewall.ps1        # Liberar portas no firewall (Windows)
-└── docker-compose.yml        # PostgreSQL 16 + Redis 7
+│       ├── components/           # Componentes reutilizáveis
+│       ├── pages/                # PDV, KDS, dashboard e configurações
+│       ├── store/                # Estado global com Zustand
+│       ├── types/                # Tipos TypeScript
+│       └── utils/                # Cliente da API
+├── docs/                         # Documentação e materiais do projeto
+├── docker-compose.yml            # PostgreSQL 16 e Redis 7
+├── start.sh                      # Inicialização rápida no Linux
+├── abrir-firewall-linux.sh       # Regras de firewall para Linux
+└── abrir-firewall.ps1            # Regras de firewall para Windows
 ```
 
-## Stack Tecnológica
+## Stack tecnológica
 
 | Camada | Tecnologia |
-|--------|-----------|
-| Backend | Go 1.26 + Fiber v2 |
-| ORM | GORM + PostgreSQL 16 |
-| Cache/PubSub | Redis 7 |
-| Autenticação | JWT (HS256) + bcrypt |
-| Tempo real | WebSocket + Redis Pub/Sub |
-| Serial/USB | go.bug.st/serial.v1 |
-| Frontend | React 19 + TypeScript 6 |
-| UI Framework | Material UI v9 + Emotion |
-| Estado global | Zustand v5 |
-| Roteamento | React Router v7 |
-| Gráficos | Recharts |
-| Animações | Framer Motion |
-| Build | Vite 8 |
+| --- | --- |
+| Backend | Go 1.26.1 + Fiber v2 |
+| Persistência | GORM + PostgreSQL 16 |
+| Cache e eventos | Redis 7 + Redis Pub/Sub |
+| Autenticação | JWT HS256 + bcrypt |
+| Tempo real | WebSocket |
+| Frontend | React 19 + TypeScript 6 + Vite 8 |
+| Interface | Material UI 9 + Emotion |
+| Estado | Zustand 5 + TanStack Query |
+| Rotas | React Router 7 |
+| Gráficos e animações | Recharts + Framer Motion |
+| Hardware | ESC/POS, serial USB e TCP |
 
 ## Pré-requisitos
 
-- [Go](https://go.dev/dl/) 1.26+
-- [Node.js](https://nodejs.org/) 20+
-- [Docker](https://docs.docker.com/engine/install/) e [Docker Compose](https://docs.docker.com/compose/install/) (para PostgreSQL e Redis)
-  - Linux: instale via `sudo apt install docker.io docker-compose-v2` (Ubuntu/Debian) ou equivalente na sua distro
+- Go 1.26.1 ou superior;
+- Node.js 20 ou superior;
+- npm;
+- Docker e Docker Compose;
+- Linux, macOS ou Windows;
+- acesso de rede aos equipamentos de impressão e TEF, quando aplicável.
 
-### Permissões para Pinpad USB (Linux)
-
-Se estiver usando um pinpad Gertec PPC930 ou similar via USB:
+Para pinpads USB no Linux:
 
 ```bash
-# Adicionar usuário ao grupo dialout
 sudo usermod -aG dialout $USER
-
-# Ou liberar o dispositivo diretamente
-sudo chmod 666 /dev/ttyACM0
+# Faça logout/login após executar o comando.
 ```
 
-## Como Executar
+## Instalação e execução
 
-### Opção Rápida: Script de Inicialização (Linux)
+### Inicialização rápida no Linux
 
 ```bash
+chmod +x start.sh
 ./start.sh
 ```
 
-Este script sobe **todos os serviços** automaticamente: Docker (PostgreSQL + Redis), Backend Go e Frontend Vite. Pressione `Ctrl+C` para encerrar tudo.
+O script inicia PostgreSQL e Redis via Docker, executa a API Go na porta `8080` e inicia o frontend Vite na porta `5173`.
 
-### Passo a passo manual
+### Execução manual
 
-#### 1. Subir banco de dados e cache
+1. Suba os serviços de infraestrutura:
 
 ```bash
 docker compose up -d
 ```
 
-Isso sobe:
-- **PostgreSQL 16** na porta `5432` (user: `postgres`, senha: `postgrespassword`, db: `manager_restaurant`)
-- **Redis 7** na porta `6379`
-
-#### 2. Iniciar o backend
+2. Instale as dependências e execute o backend:
 
 ```bash
 cd backend
+go mod download
 go run ./cmd/api/main.go
 ```
 
-O servidor inicia na porta `8080` e executa:
-- Conexão com PostgreSQL (com 5 tentativas de retry)
-- AutoMigrate (cria/atualiza todas as tabelas e colunas via migração manual)
-- Seed de dados iniciais (empresa, usuários, mesas, produtos, categorias, setores, impressoras, pinpads)
-- Conexão com Redis
-- Inicialização do Hub WebSocket
-
-#### 3. Iniciar o frontend
+3. Em outro terminal, instale as dependências e execute o frontend:
 
 ```bash
 cd frontend
@@ -111,340 +127,132 @@ npm install
 npm run dev
 ```
 
-O frontend inicia em `http://localhost:5173` com proxy para o backend:
-- `/api` → `http://localhost:8080`
-- `/ws` → `ws://localhost:8080`
+4. Acesse:
 
-#### 4. Acessar
+- Aplicação: [http://localhost:5173](http://localhost:5173)
+- API: [http://localhost:8080](http://localhost:8080)
+- WebSocket: `ws://localhost:8080/ws?token=<jwt>`
 
-Abra `http://localhost:5173` e faça login com os dados de seed:
+## Ambiente local
 
-| Email | Senha | Role |
-|-------|-------|------|
-| admin@sabor.com | 123456 | admin |
-| caixa@sabor.com | 123456 | caixa |
-| garcom@sabor.com | 123456 | garcom |
-| cozinha@sabor.com | 123456 | cozinha |
+O `docker-compose.yml` fornece os serviços abaixo:
 
-## Dados de Seed
+| Serviço | Porta | Credenciais padrão |
+| --- | ---: | --- |
+| PostgreSQL 16 | `5432` | usuário `postgres`, banco `manager_restaurant` |
+| Redis 7 | `6379` | sem senha no ambiente local |
 
-O seed inicial cria automaticamente:
-- **Empresa**: Restaurante Sabor & Cia
-- **4 usuários**: admin, caixa, garçom, cozinha
-- **4 setores**: Cozinha, Bar, Sobremesa, Caixa
-- **3 impressoras**: uma por setor (IPs mock `192.168.1.x`)
-- **2 pinpads**: TCP (Cielo) e Serial USB (Gertec PPC930)
-- **15 mesas**: numeradas de 1 a 15, status `livre`
-- **4 categorias**: Bebidas, Hambúrgueres, Porções, Sobremesas
-- **6 produtos**: burgers, batata frita, bebidas, sobremesa (com SetorID para roteamento KDS)
-- **Estoque**: 100 unidades por produto, mínimo de 10
+As credenciais padrão existem apenas para desenvolvimento. Para qualquer ambiente compartilhado ou de produção, use variáveis de ambiente e segredos fora do repositório.
 
-## Funcionalidades
+### Variáveis do backend
 
-### Autenticação e Controle de Acesso Dinâmico (RBAC)
-
-- JWT com claims `user_id`, `tenant_id` e `role`
-- Middleware `RequireAuth` protege rotas da API
-- Sistema de **Controle de Acesso Baseado em Roles (RBAC) Dinâmico**: Permissões granulares configuráveis
-- Redirecionamento dinâmico pós-login baseado no cargo do usuário (ex: Dashboard para admin, KDS para cozinha)
-- `TenantScope` no GORM isola dados entre empresas
-
-### PDV (Ponto de Venda)
-
-- **Mapa de mesas integrado**: toggle entre cardápio e mapa interativo
-- **Drag & drop** para reposicionar mesas no mapa (admin/gerente)
-- **Criar/editar/excluir mesas** direto no mapa (admin/gerente)
-- Mesas coloridas por status: verde (livre), amarelo (ocupada), azul (reservada), vermelho (fechamento)
-- Formatos visuais: redondo (círculo) ou quadrado
-- Carrinho de compras com seleção de mesa/comanda
-- Busca de produtos por código de barras
-- Criação de pedidos com dedução automática de estoque
-- Múltiplos métodos de pagamento: PIX, cartão de crédito/débito, dinheiro
-- **Fechamento de mesa direto do PDV**: botão "Fechar Mesa" na visão de consumo
-- **Transferência de mesa**: mover consumo entre mesas disponíveis
-- Integração com **TEF/Pinpad Cielo** para pagamentos com cartão
-
-### Gestão de Caixa e Segurança Financeira
-
-- **Controle Rigoroso do Caixa**: Abertura e fechamento de caixa auditados.
-- **Bloqueio de Operações (Security Guard)**: Criação de pedidos e abertura de mesas são estritamente bloqueadas no PDV e Mobile quando o caixa está fechado.
-- Modal persistente no app do Garçom alertando sobre caixa fechado.
-- Integração das operações financeiras do PDV com o módulo de Tesouraria/Financeiro.
-- Correção de estornos e devoluções em cancelamentos de pedidos.
-
-### Mapa de Mesas
-
-- Visualização drag-and-drop com posições customizáveis (pos_x, pos_y)
-- Status visuais: livre, ocupada, reservada, em_fechamento
-- Criação/edição/exclusão de mesas por admin/gerente
-- Edição de capacidade e formato (redondo/quadrado)
-- Transferência total de itens entre mesas
-- Fechamento de mesa com fluxo completo de pagamento
-
-### Gerenciamento de Produtos
-
-- CRUD completo de produtos em **Configurações > Produtos**
-- Ativar/desativar produtos (soft-delete, preserva histórico)
-- Upload de imagem por URL
-- Código de barras, categoria, preço
-- Busca integrada por nome
-- Gerenciamento de categorias com chips interativos
-
-### KDS (Kitchen Display System) Setorizado
-
-- **3 setores independentes**: Cozinha, Bar, Sobremesa
-- **Controle por Setor**: Opção de habilitar/desabilitar o painel KDS e silenciar a impressão física (KDS 100% digital).
-- Cada aba mostra apenas os itens do seu setor
-- Badge com contagem de pedidos pendentes por setor
-- Pedidos com itens de múltiplos setores aparecem em cada aba relevante
-- Fluxo de status: `recebido` → `produzindo` → `pronto` → `despachado`
-- Despacho da cozinha notifica o garçom via WebSocket
-- Atualização em tempo real via WebSocket
-- Setores padrão automáticos (fallback se API indisponível)
-
-### Integração TEF / Pinpad Cielo
-
-- **Suporte USB/Serial**: Gertec PPC930 (`/dev/ttyACM0`), comunicação via protocolo serial
-- **Suporte TCP**: Agente TEF Cielo (localhost:2001)
-- **Detecção automática**: Escaneia `/dev/ttyACM*`, `/dev/ttyUSB*`, `/dev/serial/by-id/usb-GERTEC*`
-- **Auto-criação**: Se nenhum pinpad configurado, cria um automaticamente
-- Configuração em **Configurações > Terminais TEF (Pinpad)**
-- Teste de conexão com feedback visual (online/offline)
-- Pagamento via TEF no PDV: PIX e cartão
-- Fallback de simulação para desenvolvimento (flag `simulated: true`)
-
-### Controle de Estoque
-
-- Visualização de quantidade, mínimo e alertas
-- Ajuste manual com registro de movimentação (entrada/saída)
-- Motivos: inventário, ajuste, desperdício, compra, venda
-- Dedução automática ao criar pedidos
-
-### Impressão ESC/POS
-
-- Roteamento de itens do pedido por setor (cozinha, bar, caixa)
-- **Bloqueio de Impressão por Setor**: Opção `sem_impressao` desativa totalmente a impressão de cupons para itens de setores específicos.
-- Comandos ESC/POS: bold, double height, alinhamento, corte de papel
-- Envio via TCP para impressoras térmicas na rede ou diretamente para USB
-- Fallback inteligente para a impressora do Caixa caso a impressora principal do setor falhe.
-- Fallback para console quando impressora não configurada
-- Impressão automática de fechamento e abertura do caixa
-- Impressão de pré-conta no fechamento de mesa
-
-### Dashboard
-
-- Vendas do dia
-- Pedidos ativos
-- Mesas ocupadas
-- Ticket médio
-- Top 5 produtos mais vendidos
-- Vendas por hora (gráfico)
-
-### Gestão de TI e Integrações
-
-- **Diretório de TI**: Cadastro e gerenciamento de infraestrutura/ativos com CRUD completo.
-- **Magic Fill**: Preenchimento automático do cadastro de ativos via upload de notas fiscais (XML).
-- **Integração WhatsApp**: Gerenciamento de sessão (QR Code), disparo de mensagens e sincronização de status em tempo real via WebSocket.
-
-### Tempo Real (WebSocket)
-
-- Canal Redis Pub/Sub `restaurant_realtime` para sincronização multi-instância
-- Eventos: `order_created`, `order_updated`, `kds_updated`, `table_updated`, `order_ready_dispatch`, `table_checkout_done`, `settings_updated`
-- Reconexão automática com retry a cada 5 segundos
-- Indicador visual de conexão no frontend
-
-### Tema Customizável
-
-- Cores primária/secundária e modo dark/light por tenant
-- Persistido no backend e propagado via WebSocket para todos os clientes
-
-### Garçom Mobile
-
-- Interface otimizada para dispositivos móveis
-- Notificação de pedidos prontos para retirada no balcão
-
-## API Endpoints
-
-### Autenticação
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/auth/login` | Login (retorna JWT + usuário + empresa) |
-| GET | `/api/auth/profile` | Perfil do usuário autenticado |
-| PUT | `/api/auth/tenant` | Atualizar configurações da empresa (tema) |
-
-### Mesas
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/tables` | Listar mesas |
-| POST | `/api/tables` | Criar mesa (admin/gerente) |
-| PUT | `/api/tables/:id` | Atualizar mesa (status, posição, capacidade, formato) |
-| DELETE | `/api/tables/:id` | Excluir mesa livre (admin/gerente) |
-| GET | `/api/tables/:id/orders` | Listar pedidos ativos da mesa |
-| POST | `/api/tables/transfer` | Transferir itens entre mesas |
-| POST | `/api/tables/close/:id` | Solicitar fechamento de mesa |
-| POST | `/api/tables/checkout/:id` | Finalizar checkout (libera mesa) |
-
-### Usuários
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/users` | Listar usuários |
-| POST | `/api/users` | Criar usuário |
-| PUT | `/api/users/:id` | Atualizar usuário |
-| DELETE | `/api/users/:id` | Remover usuário |
-
-### Produtos e Categorias
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/products` | Listar produtos ativos (`?all=1` inclui inativos) |
-| POST | `/api/products` | Criar produto |
-| PUT | `/api/products/:id` | Atualizar produto (inclui ativo/inativo) |
-| DELETE | `/api/products/:id` | Desativar produto (soft-delete) |
-| GET | `/api/categories` | Listar categorias |
-| POST | `/api/categories` | Criar categoria |
-| PUT | `/api/categories/:id` | Atualizar categoria |
-| DELETE | `/api/categories/:id` | Excluir categoria |
-
-### Pinpad / TEF
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/pinpads` | Listar pinpads |
-| POST | `/api/pinpads` | Registrar pinpad (serial ou TCP) |
-| PUT | `/api/pinpads/:id` | Atualizar configuração do pinpad |
-| DELETE | `/api/pinpads/:id` | Remover pinpad |
-| GET | `/api/pinpads/:id/detect` | Testar conexão com o pinpad |
-| POST | `/api/tef/payment` | Processar pagamento via TEF |
-
-### Setores
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/setores` | Listar setores (Cozinha, Bar, Sobremesa, etc.) |
-| PUT | `/api/setores/:id` | Atualiza configurações operacionais do setor (KDS e Impressão) |
-
-### Pedidos e KDS
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/orders` | Criar pedido |
-| GET | `/api/orders` | Listar pedidos |
-| PUT | `/api/orders/:id` | Atualizar status do pedido |
-| GET | `/api/kds` | Pedidos ativos para KDS (`?setor_id=X` filtra por setor) |
-
-### Pagamentos
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/api/payments` | Processar pagamento |
-
-### Dashboard
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/dashboard/stats` | Estatísticas (vendas, ticket médio, top produtos) |
-
-### Estoque
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/api/stock` | Listar estoque |
-| PUT | `/api/stock/:id` | Ajustar quantidade |
-
-### WebSocket
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/ws?token=<jwt>` | Conexão WebSocket (autenticada via query param) |
-
-## Modelos de Dados
-
-### Entidades Principais
-
-| Entidade | Descrição |
-|----------|-----------|
-| Empresa | Tenant (restaurante) com tema customizável |
-| Usuario | Operador com role (admin, caixa, garcom, cozinha, entregador) |
-| Mesa | Mesa física com posição (x, y), capacidade, formato e status |
-| Setor | Área de preparo: Cozinha, Bar, Sobremesa, Caixa |
-| Produto | Item do cardápio vinculado a categoria e setor |
-| Categoria | Agrupamento de produtos (Bebidas, Hamburgueres, etc.) |
-| Pedido | Ordem de venda com itens e status |
-| ItemPedido | Item individual dentro de um pedido, roteado por setor |
-| Comanda | Tab/conta associada a uma mesa |
-| Pagamento | Transação financeira |
-| Pinpad | Terminal TEF (serial USB ou TCP) |
-| Estoque | Quantidade em estoque por produto |
-| Impressora | Impressora térmica ESC/POS por setor |
-
-### Fluxo de Status do Pedido
-
-```
-recebido → produzindo → pronto → despachado (cozinha) → entregue (caixa/checkout)
-```
-
-- `recebido`: Pedido criado, aguardando cozinha
-- `produzindo`: Cozinha iniciou preparo
-- `pronto`: Item finalizado, aguardando despacho
-- `despachado`: Saiu da cozinha, disponível no balcão (notifica garçom)
-- `entregue`: Cliente recebeu / mesa fechada
-
-### Roteamento KDS por Setor
-
-Cada produto tem um `SetorID` que determina para qual tela do KDS o item é enviado:
-
-| Setor | Produtos típicos | Cor KDS |
-|-------|-----------------|---------|
-| Cozinha | Hamburgueres, porções, batatas | Vermelho |
-| Bar | Bebidas, refrigerantes, sucos | Azul |
-| Sobremesa | Doces, sobremesas | Amarelo |
-
-## Variáveis de Ambiente
-
-### Backend
-
-| Variável | Padrão | Descrição |
-|----------|--------|-----------|
-| `PORT` | `8080` | Porta do servidor HTTP |
+| Variável | Padrão local | Finalidade |
+| --- | --- | --- |
+| `PORT` | `8080` | Porta HTTP da API |
 | `DB_HOST` | `localhost` | Host do PostgreSQL |
 | `DB_PORT` | `5432` | Porta do PostgreSQL |
-| `DB_USER` | `postgres` | Usuário do PostgreSQL |
-| `DB_PASSWORD` | `postgrespassword` | Senha do PostgreSQL |
+| `DB_USER` | `postgres` | Usuário do banco |
+| `DB_PASSWORD` | `postgrespassword` | Senha do banco |
 | `DB_NAME` | `manager_restaurant` | Nome do banco |
 | `REDIS_ADDR` | `localhost:6379` | Endereço do Redis |
 
-### Frontend
+### Variáveis do frontend
 
-| Variável | Padrão | Descrição |
-|----------|--------|-----------|
-| `VITE_API_URL` | (vazio) | URL base da API (usa proxy Vite por padrão) |
+| Variável | Padrão | Finalidade |
+| --- | --- | --- |
+| `VITE_API_URL` | vazio | URL base da API; vazio usa o proxy do Vite |
 
-## Acesso Remoto na Rede Local
+## Usuários de desenvolvimento
 
-O frontend escuta em `0.0.0.0:5173`, permitindo acesso de dispositivos na mesma rede (tablets, celulares).
+O seed inicial cria usuários de demonstração:
 
-### Linux
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Administrador | `admin@sabor.com` | `123456` |
+| Caixa | `caixa@sabor.com` | `123456` |
+| Garçom | `garcom@sabor.com` | `123456` |
+| Cozinha | `cozinha@sabor.com` | `123456` |
 
-```bash
-# Se estiver usando ufw (Ubuntu/Debian):
-./abrir-firewall-linux.sh
+Altere ou remova essas credenciais antes de disponibilizar o sistema fora do ambiente local.
 
-# Ou manualmente:
-sudo ufw allow 5173/tcp
-sudo ufw allow 8080/tcp
+## Fluxos operacionais
+
+### Status dos pedidos
+
+```
+recebido → produzindo → pronto → despachado → entregue
 ```
 
-Caso sua distribuição não use `ufw` (Arch, openSUSE, etc.), execute o script para instruções ou configure o firewall equivalente (`iptables`, `firewalld`, `nftables`).
+Cada item pode ser direcionado a um setor específico. Assim, cozinha, bar e sobremesa visualizam somente o que precisam preparar.
 
-### Windows
+### Eventos em tempo real
 
-Para liberar no firewall do Windows, execute como administrador:
+A aplicação usa Redis Pub/Sub e WebSocket para propagar eventos como:
 
-```powershell
-.\abrir-firewall.ps1
-```
+- criação e atualização de pedidos;
+- alterações no KDS;
+- atualização do status das mesas;
+- despacho de itens prontos;
+- fechamento de mesas;
+- atualização de configurações e temas.
 
-Ou execute o arquivo `.bat` com botão direito → "Executar como administrador".
+## API
+
+A API utiliza o prefixo `/api` e autenticação JWT. Os principais grupos de endpoints são:
+
+| Grupo | Exemplos |
+| --- | --- |
+| Autenticação | `/api/auth/login`, `/api/auth/profile` |
+| Mesas | `/api/tables`, `/api/tables/transfer`, `/api/tables/checkout/:id` |
+| Pedidos | `/api/orders`, `/api/kds` |
+| Produtos | `/api/products`, `/api/categories` |
+| Caixa e pagamentos | `/api/payments`, `/api/tef/payment` |
+| Estoque | `/api/stock` |
+| Equipamentos | `/api/pinpads`, `/api/setores` |
+| Indicadores | `/api/dashboard/stats` |
+| Tempo real | `/ws?token=<jwt>` |
+
+Consulte o código dos handlers em `backend/internal/handlers` para conferir contratos, payloads e permissões atualizados.
+
+## Segurança e implantação
+
+- Não use as credenciais padrão em produção.
+- Não versione arquivos `.env`, tokens, chaves JWT ou credenciais de TEF.
+- Coloque a API atrás de HTTPS e restrinja as portas do PostgreSQL e Redis à rede necessária.
+- Troque o segredo JWT e use rotação de credenciais.
+- Separe usuários de desenvolvimento, homologação e produção.
+- Faça backup do PostgreSQL e valide a restauração periodicamente.
+- Configure firewall conforme o ambiente usando os scripts fornecidos.
+- Revise regras fiscais, integrações de pagamento e requisitos de proteção de dados antes da operação comercial.
+
+## Scripts úteis
+
+| Comando | Descrição |
+| --- | --- |
+| `docker compose up -d` | Inicia PostgreSQL e Redis |
+| `docker compose down` | Para os serviços locais |
+| `go run ./cmd/api/main.go` | Executa a API |
+| `npm run dev` | Executa o frontend em desenvolvimento |
+| `npm run build` | Gera o build de produção do frontend |
+| `npm run lint` | Executa a análise estática do frontend |
+| `./abrir-firewall-linux.sh` | Exibe/aplica regras de firewall no Linux |
+| `.\\abrir-firewall.ps1` | Aplica regras de firewall no Windows |
+
+## Contribuição
+
+Contribuições são bem-vindas. Para colaborar:
+
+1. Crie uma branch para sua alteração.
+2. Mantenha o escopo da mudança claro.
+3. Atualize a documentação quando necessário.
+4. Execute lint e build antes de abrir um pull request.
+5. Descreva contexto, testes realizados e possíveis impactos.
+
+## Licença
+
+Este projeto está distribuído sob a licença [MIT](LICENSE). Consulte o arquivo de licença para conhecer as permissões e condições de uso.
+
+## Autor
+
+Desenvolvido por [betoarts](https://github.com/betoarts).
+
